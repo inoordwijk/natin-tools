@@ -154,12 +154,7 @@ input:focus,select:focus{outline:none;border-color:var(--teal);}
     </div>
     <div id="student-keuze-lijst" style="display:flex;flex-direction:column;gap:4px;max-height:400px;overflow-y:auto;"></div>
     <div style="margin-top:12px;font-size:12px;color:var(--muted);">Datum toets: <strong>30-06-2026</strong> &middot; P09 Schriftelijke Toets v1 &middot; Cesuur 65% (34 pt)</div>
-    <div style="margin-top:10px;background:var(--lt-gold);border:1px solid var(--gold);border-radius:var(--radius);padding:10px 12px;font-size:12px;color:#5C3D00;display:flex;align-items:center;justify-content:space-between;gap:12px;">
-      <span>&#9888; Data wordt bewaard zolang dit tabblad open is. Exporteer JSON voor je het sluit, en laad die hier bij een nieuwe sessie.</span>
-      <label style="background:var(--navy);color:var(--white);padding:5px 12px;border-radius:6px;cursor:pointer;white-space:nowrap;font-size:12px;">
-        &#128229; Laad JSON <input type="file" accept=".json" id="json-import-input" onchange="importeerJSON(this)" style="display:none;">
-      </label>
-    </div>
+
   </div>
   <div class="card">
     <div class="card-title">Eerder gecorrigeerde studenten</div>
@@ -456,8 +451,8 @@ const SCORE_LEVELS={1:[[1,'Goed (1)','ok'],[0,'Fout (0)','bad']],2:[[2,'Goed (2)
 
 let current={}, scores={}, scoreKeuzes={}, hwScores={};
 
-function loadStorage(){try{return JSON.parse(sessionStorage.getItem('p09_v4_studenten')||'[]');}catch(e){return[];}}
-function saveStorage(arr){try{sessionStorage.setItem('p09_v4_studenten',JSON.stringify(arr));}catch(e){}}
+function loadStorage(){try{return JSON.parse(localStorage.getItem('p09_v4_studenten')||'[]');}catch(e){return[];}}
+function saveStorage(arr){try{localStorage.setItem('p09_v4_studenten',JSON.stringify(arr));}catch(e){}}
 
 function berekenCijfer(totaal){
   if(totaal<=0)return 1.0;if(totaal>=MAX)return 10.0;
@@ -728,7 +723,7 @@ function showScreen(id){
   if(id==='s6'){document.getElementById('klas-tbody').innerHTML='';buildKlas();switchTab('klas');}
   window.scrollTo(0,0);
 }
-function clearAll(){if(!confirm('Verwijder ALLE data?'))return;sessionStorage.removeItem('p09_v4_studenten');renderStudentList();filterStudenten();}
+function clearAll(){if(!confirm('Verwijder ALLE data?'))return;localStorage.removeItem('p09_v4_studenten');renderStudentList();filterStudenten();}
 function printPDF(){window.print();}
 
 function exportCSV(){
@@ -929,18 +924,16 @@ function importeerJSON(input) {
 })();
 
 // ── EVENTLISTENERS (file:// safe) ────────────────────────
-document.addEventListener('DOMContentLoaded', function() {
-  // Navigatiebalk stappen
-  document.querySelectorAll('.step[data-screen]').forEach(function(btn) {
-    btn.addEventListener('click', function() {
-      showScreen(btn.getAttribute('data-screen'));
-    });
+// Navigatiebalk stappen — direct registreren (script staat al na de DOM)
+document.querySelectorAll('.step[data-screen]').forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    showScreen(btn.getAttribute('data-screen'));
   });
-  // Topbar startscherm knop
-  var topbar = document.getElementById('topbar-info');
-  if (topbar) topbar.addEventListener('click', function() {
-    newStudent();
-  });
+});
+// Topbar startscherm knop
+var topbar = document.getElementById('topbar-info');
+if (topbar) topbar.addEventListener('click', function() {
+  newStudent();
 });
 </script>
 </body>
