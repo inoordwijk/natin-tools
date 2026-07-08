@@ -726,10 +726,23 @@ function showScreen(id){
 function clearAll(){if(!confirm('Verwijder ALLE data?'))return;localStorage.removeItem('p09_v4_studenten');renderStudentList();filterStudenten();}
 function printPDF(){window.print();}
 
+function berekenAdvies(s){
+  const pA=Math.round(((s.a||0)/13)*100),pB=Math.round(((s.b||0)/18)*100);
+  const pC=Math.round(((s.c||0)/16)*100),pD=Math.round(((s.d||0)/5)*100);
+  const zwak=[];
+  if(pA<70)zwak.push('basiskennis (blok A)');
+  if(pB<70)zwak.push('begripsomschrijvingen (blok B)');
+  if(pC<70)zwak.push('uitlegvragen (blok C)');
+  if(pD<60)zwak.push('risicomatrix (blok D)');
+  const herk=s.herkansing?'Dit is een herkansing. ':'';
+  if(zwak.length===0)return herk+'Alle blokken voldoende. Geen specifiek advies nodig.';
+  return herk+'Focus op: '+zwak.join('; ')+'. Gebruik het correctiemodel en de lesslides.';
+}
+
 function exportCSV(){
   const arr=loadStorage();if(arr.length===0){alert('Geen data.');return;}
-  const sep=';',headers=['Achternaam','Voornaam','Klas','Datum','Herkansing','Blok A (13)','Blok B (18)','Blok C (16)','Blok D (5)','Toetsscore','Toetscijfer','HW-cijfer','Eindcijfer','Beoordeling'];
-  const rows=[headers,...arr.map(s=>[s.achternaam,s.voornaam,s.klas,s.datum||'',s.herkansing?'Ja':'Nee',s.a,s.b,s.c,s.d,s.totaal,s.toetsCijfer?s.toetsCijfer.toFixed(1).replace('.',','):'',s.hwCijfer?s.hwCijfer.toFixed(1).replace('.',','):'',s.eindcijfer?s.eindcijfer.toFixed(1).replace('.',','): '',s.eindcijfer>=5.5?'Voldoende':'Onvoldoende'])];
+  const sep=';',headers=['Achternaam','Voornaam','Klas','Datum','Herkansing','Blok A (13)','Blok B (18)','Blok C (16)','Blok D (5)','Toetsscore','Toetscijfer','HW-cijfer','Eindcijfer','Advies'];
+  const rows=[headers,...arr.map(s=>[s.achternaam,s.voornaam,s.klas,s.datum||'',s.herkansing?'Ja':'Nee',s.a,s.b,s.c,s.d,s.totaal,s.toetsCijfer?s.toetsCijfer.toFixed(1).replace('.',','):'',s.hwCijfer?s.hwCijfer.toFixed(1).replace('.',','):'',s.eindcijfer?s.eindcijfer.toFixed(1).replace('.',','): '',berekenAdvies(s)])];
   const csv='\uFEFF'+rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(sep)).join('\r\n');
   const a=document.createElement('a');
   a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);
