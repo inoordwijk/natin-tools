@@ -741,8 +741,8 @@ function berekenAdvies(s){
 
 function exportCSV(){
   const arr=loadStorage();if(arr.length===0){alert('Geen data.');return;}
-  const sep=';',headers=['Achternaam','Voornaam','Klas','Datum','Herkansing','Blok A (13)','Blok B (18)','Blok C (16)','Blok D (5)','Toetsscore','Toetscijfer','HW-cijfer','Eindcijfer','Advies'];
-  const rows=[headers,...arr.map(s=>[s.achternaam,s.voornaam,s.klas,s.datum||'',s.herkansing?'Ja':'Nee',s.a,s.b,s.c,s.d,s.totaal,s.toetsCijfer?s.toetsCijfer.toFixed(1).replace('.',','):'',s.hwCijfer?s.hwCijfer.toFixed(1).replace('.',','):'',s.eindcijfer?s.eindcijfer.toFixed(1).replace('.',','): '',berekenAdvies(s)])];
+  const sep=',',headers=['Achternaam','Voornaam','Klas','Datum','Herkansing','Blok A (13)','Blok B (18)','Blok C (16)','Blok D (5)','Toetsscore','Toetscijfer','HW-cijfer','Eindcijfer','Advies'];
+  const rows=[headers,...arr.map(s=>[s.achternaam,s.voornaam,s.klas,s.datum||'',s.herkansing?'Ja':'Nee',s.a,s.b,s.c,s.d,s.totaal,s.toetsCijfer?s.toetsCijfer.toFixed(1):'',s.hwCijfer?s.hwCijfer.toFixed(1):'',s.eindcijfer?s.eindcijfer.toFixed(1): '',berekenAdvies(s)])];
   const csv='\uFEFF'+rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(sep)).join('\r\n');
   const a=document.createElement('a');
   a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);
