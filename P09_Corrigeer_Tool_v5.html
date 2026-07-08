@@ -618,7 +618,7 @@ function buildResult(){
   if(pA<70)zwak.push('basiskennis (blok A)');if(pB<70)zwak.push('begripsomschrijvingen (blok B)');
   if(pC<70)zwak.push('uitlegvragen (blok C)');if(pD<60)zwak.push('risicomatrix (blok D)');
   const herk=current.herkansing?'Dit is een herkansing. ':'';
-  document.getElementById('advies-content').innerHTML=`<div class="advies-lbl">&#128161; Advies</div>${herk}${zwak.length===0?'Alle blokken voldoende. Geen specifiek advies nodig.':'Focus op: '+zwak.join('; ')+'. Gebruik het correctiemodel en de lesslides.'}`;
+  document.getElementById('advies-content').innerHTML=`<div class="advies-lbl">&#128161; Advies</div>${herk}${zwak.length===0?'Alle blokken voldoende. Geen specifiek advies nodig.':'Focus op: '+zwak.join(' / ')+'. Gebruik het correctiemodel en de lesslides.'}`;
 }
 
 function clearStudent(){
@@ -736,7 +736,7 @@ function berekenAdvies(s){
   if(pD<60)zwak.push('risicomatrix (blok D)');
   const herk=s.herkansing?'Dit is een herkansing. ':'';
   if(zwak.length===0)return herk+'Alle blokken voldoende. Geen specifiek advies nodig.';
-  return herk+'Focus op: '+zwak.join('; ')+'. Gebruik het correctiemodel en de lesslides.';
+  return herk+'Focus op: '+zwak.join(' / ')+'. Gebruik het correctiemodel en de lesslides.';
 }
 
 function exportCSV(){
