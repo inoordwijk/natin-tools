@@ -450,7 +450,25 @@ function laadToetsConfig(file) {
       return;
     }
     const totaalWeging = config.componenten.reduce((s,c) => s + c.weging, 0);
-    if (totaalWeging !== 100) {
+    const heeftEigenInspanning = config.componenten.some(c => c.type === 'inspanning');
+
+    if (config.herkansing_van && !heeftEigenInspanning) {
+      // Herkansing zonder eigen huiswerk-component: neemt gewicht over van de parent-toets.
+      // Controleer of eigen weging + overgenomen weging optelt tot 100%.
+      const parentEntry = idx.find(t => t.toets_id === config.herkansing_van);
+      if (!parentEntry) {
+        toonUploadStatus('Parent-toets "' + config.herkansing_van + '" is nog niet geladen. Laad eerst de originele toets.', true);
+        return;
+      }
+      const parentData = getToetsData(config.herkansing_van);
+      const parentInspanningComp = parentData?.config.componenten.find(c => c.type === 'inspanning');
+      const overgenomenWeging = parentInspanningComp ? parentInspanningComp.weging : 0;
+      const gecombineerd = totaalWeging + overgenomenWeging;
+      if (gecombineerd !== 100) {
+        toonUploadStatus('Eigen weging (' + totaalWeging + '%) + overgenomen huiswerkweging (' + overgenomenWeging + '%) telt op tot ' + gecombineerd + '%, moet 100% zijn.', true);
+        return;
+      }
+    } else if (totaalWeging !== 100) {
       toonUploadStatus('Wegingen van componenten tellen op tot ' + totaalWeging + '%, moet 100% zijn.', true);
       return;
     }
