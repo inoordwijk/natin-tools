@@ -1,0 +1,1807 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NATIN Corrigeertool v6 — Multi-toets</title>
+<style>
+:root {
+  --navy:#0B1F3A; --teal:#1B8A7E; --gold:#E8A022; --white:#FFFFFF;
+  --off:#F7F9FC; --lt-teal:#D6EDEA; --lt-gold:#FDF3E0; --lt-navy:#E8EDF2;
+  --lt-red:#FEE2E2; --lt-green:#D1FAE5; --red:#DC2626; --green:#059669;
+  --border:#CBD5E1; --muted:#64748B; --radius:8px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:Arial,sans-serif;font-size:14px;background:var(--off);color:var(--navy);line-height:1.55;}
+.topbar{background:var(--navy);color:var(--white);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;}
+.topbar-title{font-size:15px;font-weight:bold;}
+.topbar-sub{font-size:11px;color:#AACCDD;margin-top:2px;}
+.topbar-btn{background:none;border:1px solid #2A4A70;color:var(--gold);font-size:12px;padding:5px 12px;border-radius:6px;cursor:pointer;}
+.topbar-btn:hover{background:#132D4F;}
+.progress{background:var(--lt-navy);border-bottom:1px solid var(--border);padding:10px 24px;display:flex;gap:6px;align-items:center;flex-wrap:wrap;}
+.step{font-size:11px;padding:4px 10px;border-radius:20px;background:var(--white);border:1px solid var(--border);color:var(--muted);cursor:pointer;}
+.step.active{background:var(--lt-teal);border-color:var(--teal);color:var(--teal);font-weight:bold;}
+.arr{color:var(--muted);font-size:12px;}
+.container{max-width:900px;margin:0 auto;padding:24px 16px 60px;}
+.screen{display:none;}.screen.active{display:block;}
+.card{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:20px 22px;margin-bottom:14px;}
+.card-title{font-size:13px;font-weight:bold;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:12px;}
+.field-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;}
+label{font-size:12px;color:var(--muted);display:block;margin-bottom:3px;}
+input[type=text],input[type=number],select,textarea{width:100%;border:1px solid var(--border);border-radius:var(--radius);padding:8px 10px;font-size:13px;font-family:Arial,sans-serif;background:var(--white);color:var(--navy);}
+input:focus,select:focus{outline:none;border-color:var(--teal);}
+.btn{border:none;border-radius:var(--radius);padding:9px 18px;font-size:13px;font-weight:bold;cursor:pointer;}
+.btn-primary{background:var(--teal);color:var(--white);}
+.btn-primary:hover{background:#156D63;}
+.btn-ghost{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.btn-ghost:hover{background:var(--off);}
+.btn-gold{background:var(--gold);color:var(--navy);}
+.btn-red{background:#EF4444;color:var(--white);}
+.btn-orange{background:#F97316;color:var(--white);}
+.btn-row{display:flex;gap:8px;justify-content:flex-end;margin-top:16px;flex-wrap:wrap;}
+.chip{display:inline-flex;align-items:center;gap:6px;background:var(--lt-navy);border:1px solid var(--border);border-radius:20px;padding:4px 12px;font-size:12px;color:var(--muted);margin-bottom:14px;}
+.blok-tabs{display:flex;gap:2px;border-bottom:1px solid var(--border);margin-bottom:16px;flex-wrap:wrap;}
+.btab{padding:8px 14px;font-size:13px;cursor:pointer;color:var(--muted);border:none;background:none;border-bottom:2px solid transparent;}
+.btab.active{color:var(--teal);border-bottom-color:var(--teal);font-weight:bold;}
+.q-row{border-bottom:1px solid var(--off);padding:14px 0;}
+.q-row:last-child{border-bottom:none;padding-bottom:4px;}
+.q-header{display:flex;gap:10px;align-items:flex-start;margin-bottom:8px;}
+.q-badge{font-size:11px;font-weight:bold;background:var(--lt-navy);border:1px solid var(--border);border-radius:4px;padding:2px 7px;color:var(--muted);white-space:nowrap;}
+.q-text{font-size:13px;color:var(--navy);flex:1;}
+.q-pts{font-size:11px;color:var(--muted);white-space:nowrap;margin-top:2px;}
+.model-box{background:var(--lt-green);border-radius:var(--radius);padding:10px 12px;margin-bottom:8px;}
+.model-lbl{font-size:11px;font-weight:bold;color:var(--green);margin-bottom:4px;}
+.model-txt{font-size:12px;color:#065F46;line-height:1.55;}
+.score-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.score-lbl{font-size:12px;color:var(--muted);}
+.score-btns{display:flex;gap:4px;flex-wrap:wrap;}
+.sc{font-size:12px;padding:5px 11px;border-radius:var(--radius);border:1px solid var(--border);background:var(--white);cursor:pointer;color:var(--muted);}
+.sc:hover{border-color:var(--teal);}
+.sc.ok{background:var(--lt-green);border-color:var(--green);color:var(--green);font-weight:bold;}
+.sc.half{background:var(--lt-gold);border-color:var(--gold);color:#854F0B;font-weight:bold;}
+.sc.bad{background:var(--lt-red);border-color:var(--red);color:var(--red);font-weight:bold;}
+.abc-btn{font-size:14px;font-weight:bold;padding:7px 18px;min-width:48px;letter-spacing:.03em;}
+.abc-btn:hover:not(.ok):not(.bad){background:var(--lt-navy);border-color:var(--navy);color:var(--navy);}
+.blok-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:6px;}
+.blok-name{font-size:14px;font-weight:bold;color:var(--navy);}
+.blok-sub{font-size:13px;color:var(--teal);font-weight:bold;}
+.metric-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin-bottom:14px;}
+.metric{background:var(--off);border-radius:var(--radius);padding:12px;text-align:center;}
+.metric-lbl{font-size:11px;color:var(--muted);margin-bottom:4px;}
+.metric-val{font-size:22px;font-weight:bold;}
+.metric-sub{font-size:11px;color:var(--muted);}
+.bar-wrap{background:var(--off);border-radius:4px;height:6px;margin:5px 0 0;overflow:hidden;}
+.bar-inner{height:100%;border-radius:4px;}
+.cijfer-display{font-size:56px;font-weight:bold;line-height:1;}
+.analyse-row{display:flex;gap:10px;padding:10px 0;border-bottom:1px solid var(--off);}
+.analyse-row:last-child{border-bottom:none;}
+.analyse-blok{font-size:13px;font-weight:bold;color:var(--navy);margin-bottom:2px;}
+.analyse-txt{font-size:13px;color:var(--muted);line-height:1.5;}
+.advies-box{background:var(--lt-teal);border:1px solid #6EE7B7;border-radius:var(--radius);padding:12px 14px;margin-top:10px;font-size:13px;color:#1A3A38;}
+.advies-lbl{font-weight:bold;margin-bottom:4px;color:var(--teal);}
+.klas-tbl{width:100%;border-collapse:collapse;font-size:13px;}
+.klas-tbl th{font-size:11px;font-weight:bold;color:var(--muted);text-align:left;padding:6px 8px;border-bottom:1px solid var(--border);background:var(--off);white-space:nowrap;}
+.klas-tbl td{padding:9px 8px;border-bottom:1px solid var(--off);vertical-align:middle;white-space:nowrap;}
+.klas-tbl tr:last-child td{border-bottom:none;}
+.klas-tbl tr:hover td{background:var(--off);}
+.pill{display:inline-block;font-size:12px;font-weight:bold;padding:3px 9px;border-radius:12px;}
+.pill-v{background:var(--lt-green);color:var(--green);}
+.pill-o{background:var(--lt-red);color:var(--red);}
+.link-btn{background:none;border:none;color:var(--teal);font-size:12px;cursor:pointer;text-decoration:underline;}
+.link-btn-red{background:none;border:none;color:var(--red);font-size:12px;cursor:pointer;}
+.student-list-item{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--off);flex-wrap:wrap;gap:8px;}
+.student-list-item:last-child{border-bottom:none;}
+.insp-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--off);flex-wrap:wrap;}
+.insp-row:last-child{border-bottom:none;}
+.insp-naam{font-size:13px;color:var(--navy);flex:1;min-width:150px;}
+.insp-btns{display:flex;gap:4px;}
+.insp-btn{font-size:12px;padding:5px 12px;border-radius:var(--radius);border:1px solid var(--border);background:var(--white);cursor:pointer;color:var(--muted);}
+.insp-btn:hover{border-color:var(--teal);}
+.insp-btn.sel-s{background:var(--lt-green);border-color:var(--green);color:var(--green);font-weight:bold;}
+.insp-btn.sel-m{background:var(--lt-gold);border-color:var(--gold);color:#854F0B;font-weight:bold;}
+.insp-btn.sel-n{background:var(--lt-red);border-color:var(--red);color:var(--red);font-weight:bold;}
+.scenario-wrap{background:var(--lt-gold);border:1px solid var(--gold);border-radius:var(--radius);padding:16px;}
+.scenario-title{font-size:13px;font-weight:bold;color:#854F0B;margin-bottom:10px;}
+.slider-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;font-size:13px;flex-wrap:wrap;}
+.slider-row label{color:var(--navy);min-width:180px;}
+.slider-row input[type=range]{flex:1;min-width:100px;}
+.slider-val{font-weight:bold;color:var(--teal);min-width:35px;}
+.toets-card{background:var(--white);border:1px solid var(--border);border-radius:10px;padding:16px 18px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;}
+.toets-info{flex:1;min-width:200px;}
+.toets-naam{font-size:14px;font-weight:bold;color:var(--navy);}
+.toets-meta{font-size:12px;color:var(--muted);margin-top:2px;}
+.badge-hk{display:inline-block;font-size:10px;background:var(--lt-gold);color:#854F0B;padding:2px 8px;border-radius:10px;margin-left:8px;font-weight:bold;}
+.upload-zone{border:2px dashed var(--border);border-radius:var(--radius);padding:24px;text-align:center;background:var(--off);cursor:pointer;}
+.upload-zone:hover{border-color:var(--teal);}
+.hk-panel{background:var(--lt-gold);border:1px solid var(--gold);border-radius:var(--radius);padding:14px 16px;margin-top:10px;}
+.hk-panel-title{font-size:12px;font-weight:bold;color:#854F0B;margin-bottom:8px;}
+@media print{.topbar,.progress,.btn-row,.score-btns,.score-lbl,.link-btn,.link-btn-red,.blok-tabs,.insp-btns{display:none!important;}body{background:white;}.card{border:1px solid #ccc;break-inside:avoid;}.model-box{display:block!important;}.cijfer-display{font-size:40px;}}
+.wiz-stepper{display:flex;align-items:center;margin-bottom:20px;}
+.wiz-step-col{display:flex;flex-direction:column;align-items:center;gap:4px;}
+.wiz-dot{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:bold;background:var(--off);color:var(--muted);border:1px solid var(--border);}
+.wiz-dot.done{background:var(--lt-green);color:var(--green);border-color:var(--green);}
+.wiz-dot.active{background:var(--teal);color:var(--white);border-color:var(--teal);}
+.wiz-line{flex:1;height:2px;background:var(--border);margin:0 4px;}
+.wiz-line.done{background:var(--green);}
+.wiz-label{font-size:11px;color:var(--muted);text-align:center;width:90px;}
+.wiz-label.active{color:var(--teal);font-weight:bold;}
+.comp-row{display:flex;gap:6px;align-items:center;margin-bottom:6px;}
+.comp-row input[type=text]{flex:2;}
+.comp-row input[type=number]{flex:1;}
+.comp-row select{flex:1;}
+.weging-indicator{font-size:12px;padding:5px 12px;border-radius:var(--radius);display:inline-block;}
+.weging-ok{background:var(--lt-green);color:var(--green);}
+.weging-bad{background:var(--lt-red);color:var(--red);}
+.optional-banner{background:var(--lt-gold);color:#854F0B;border-radius:var(--radius);padding:10px 14px;font-size:12px;margin-bottom:14px;}
+.toggle-row{display:flex;align-items:center;gap:10px;margin-bottom:14px;background:var(--off);border-radius:var(--radius);padding:8px 12px;}
+.toggle-switch{width:36px;height:20px;border-radius:10px;background:var(--border);position:relative;cursor:pointer;flex-shrink:0;}
+.toggle-switch.on{background:var(--teal);}
+.toggle-knob{width:16px;height:16px;border-radius:50%;background:var(--white);position:absolute;top:2px;left:2px;transition:left .15s;}
+.toggle-switch.on .toggle-knob{left:18px;}
+.mc-list-row{display:flex;align-items:center;gap:12px;padding:9px 4px;border-bottom:1px solid var(--off);}
+.mc-list-row:last-child{border-bottom:none;}
+.mc-list-row.missing{background:var(--lt-red);border-radius:var(--radius);}
+.mc-qid{font-size:12px;font-weight:bold;color:var(--muted);min-width:32px;}
+.mc-qtext{font-size:12px;color:var(--muted);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.mc-abc{display:flex;gap:4px;flex-shrink:0;}
+.mc-abc button{width:28px;height:28px;border-radius:4px;border:1px solid var(--border);background:var(--white);font-size:12px;font-weight:bold;cursor:pointer;color:var(--muted);}
+.mc-abc button.ok{background:var(--lt-green);border-color:var(--green);color:var(--green);}
+.mc-abc button.bad{background:var(--lt-red);border-color:var(--red);color:var(--red);}
+.validatie-chip{font-size:11px;padding:4px 10px;border-radius:20px;background:var(--lt-gold);color:#854F0B;cursor:pointer;white-space:nowrap;}
+.validatie-chip.compleet{background:var(--lt-green);color:var(--green);}
+.warn-banner{background:var(--lt-gold);border-radius:var(--radius);padding:12px 14px;font-size:12px;color:#854F0B;margin-bottom:14px;}
+.warn-title{font-weight:bold;margin-bottom:6px;}
+.warn-item{display:flex;justify-content:space-between;padding:3px 0;}
+.warn-link{color:#854F0B;text-decoration:underline;cursor:pointer;}
+.comp-summary{display:flex;justify-content:space-between;align-items:center;padding:6px 0;font-size:12px;border-bottom:1px solid var(--off);}
+.comp-summary:last-child{border-bottom:none;}
+.slider-locked-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+.slider-locked-row label{min-width:160px;margin-bottom:0;}
+.slider-locked-row input[type=range]{flex:1;}
+.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(11,31,58,0.5);display:flex;align-items:center;justify-content:center;z-index:1000;}
+.modal-box{background:var(--white);border-radius:12px;padding:24px;max-width:420px;width:90%;}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div>
+    <div class="topbar-title">&#9998; NATIN Corrigeertool v7</div>
+    <div class="topbar-sub">Multi-toets · Irwin Noordwijk</div>
+  </div>
+  <div style="display:flex;gap:10px;align-items:center;">
+    <div class="validatie-chip" id="validatie-chip" style="display:none;" onclick="toonValidatieOverzicht()">&mdash;</div>
+    <button class="topbar-btn" id="btn-alle-toetsen">&#128194; Alle toetsen</button>
+  </div>
+</div>
+
+<div class="progress" id="progressbar" style="display:none;">
+  <div class="step active" id="nav-student" data-screen="s-student">1 · Student</div>
+  <div class="arr">&rsaquo;</div>
+  <div id="nav-dynamic-container" style="display:contents;"></div>
+  <div class="arr">&rsaquo;</div>
+  <div class="step" id="nav-resultaat" data-screen="s-resultaat">Resultaat</div>
+  <div class="arr">&rsaquo;</div>
+  <div class="step" id="nav-klas" data-screen="s-klas">Klasoverzicht</div>
+</div>
+
+<div class="container">
+
+<!-- ═══ SCHERM: TOETSENBEHEER (landing) ═══ -->
+<div class="screen active" id="s-beheer">
+  <div class="card">
+    <div class="card-title">Toetsen</div>
+    <div id="toetsen-lijst"></div>
+    <div class="btn-row" style="justify-content:flex-start;margin-top:16px;gap:10px;">
+      <button class="btn btn-primary" onclick="startWizard()">&#10133; Nieuwe toets aanmaken</button>
+      <button class="btn btn-ghost" onclick="toggleAdvancedUpload()">Geavanceerd: volledige config JSON uploaden</button>
+    </div>
+    <div id="advanced-upload-wrap" style="display:none;margin-top:14px;padding-top:14px;border-top:1px solid var(--border);">
+      <div style="font-size:12px;color:var(--muted);margin-bottom:10px;">Voor als je de volledige toetsconfig al elders (bijv. via AI) hebt gegenereerd volgens het JSON-schema.</div>
+      <div class="upload-zone">
+        <label style="cursor:pointer;">
+          <div style="font-size:14px;color:var(--navy);margin-bottom:6px;">&#128193; Klik om een volledige toetsconfig JSON te selecteren</div>
+          <div style="font-size:11px;color:var(--muted);">Zie JSON_Schema_Corrigeertool_v6.md voor het vereiste format</div>
+          <input type="file" accept=".json" id="config-upload-input" style="display:none;">
+        </label>
+      </div>
+      <div id="upload-status" style="margin-top:10px;font-size:13px;"></div>
+      <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border);">
+        <label style="cursor:pointer;font-size:12px;color:var(--muted);">
+          Heb je al eerder gecorrigeerde studenten (migratiebestand)? <span style="color:var(--teal);text-decoration:underline;">Importeer resultaten hier</span>
+          <input type="file" accept=".json" id="resultaten-upload-input" style="display:none;">
+        </label>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ WIZARD STAP 1: ALGEMEEN ═══ -->
+<div class="screen" id="s-wiz1">
+  <div class="wiz-stepper">
+    <div class="wiz-step-col"><div class="wiz-dot active">1</div><div class="wiz-label active">Algemeen</div></div>
+    <div class="wiz-line"></div>
+    <div class="wiz-step-col"><div class="wiz-dot">2</div><div class="wiz-label">Inhoud</div></div>
+    <div class="wiz-line"></div>
+    <div class="wiz-step-col"><div class="wiz-dot">3</div><div class="wiz-label">Historisch (optioneel)</div></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Algemene instellingen</div>
+    <div class="field-grid">
+      <div><label>Toets ID (geen spaties)</label><input type="text" id="wiz-toets-id" placeholder="P10_2026"></div>
+      <div><label>Toets naam</label><input type="text" id="wiz-toets-naam" placeholder="P10 Webapplicaties"></div>
+    </div>
+    <div class="field-grid">
+      <div><label>Module</label><input type="text" id="wiz-module" placeholder="P10"></div>
+      <div><label>Datum</label><input type="text" id="wiz-datum" placeholder="dd-mm-jjjj"></div>
+    </div>
+    <div class="field-grid">
+      <div><label>Max. punten (toets-onderdeel)</label><input type="number" id="wiz-max-punten" value="52"></div>
+      <div><label>Cesuur (%)</label><input type="number" id="wiz-cesuur" value="65"></div>
+    </div>
+    <label style="margin-top:12px;">Componenten en weging</label>
+    <div id="wiz-componenten-lijst"></div>
+    <button class="btn btn-ghost" style="font-size:12px;margin-top:6px;" onclick="wizVoegComponentToe()">+ Component toevoegen</button>
+    <div id="wiz-weging-indicator" style="margin-top:10px;"></div>
+  </div>
+  <div class="btn-row">
+    <button class="btn btn-ghost" onclick="showScreen('s-beheer')">Annuleren</button>
+    <button class="btn btn-primary" onclick="wizNaarStap2()">Volgende: inhoud &rsaquo;</button>
+  </div>
+</div>
+
+<!-- ═══ WIZARD STAP 2: INHOUD ═══ -->
+<div class="screen" id="s-wiz2">
+  <div class="wiz-stepper">
+    <div class="wiz-step-col"><div class="wiz-dot done">&#10003;</div><div class="wiz-label">Algemeen</div></div>
+    <div class="wiz-line done"></div>
+    <div class="wiz-step-col"><div class="wiz-dot active">2</div><div class="wiz-label active">Inhoud</div></div>
+    <div class="wiz-line"></div>
+    <div class="wiz-step-col"><div class="wiz-dot">3</div><div class="wiz-label">Historisch (optioneel)</div></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Vragen importeren</div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:10px;">JSON met blokken en vragen. Zie schema-document voor het format.</div>
+    <div class="upload-zone">
+      <label style="cursor:pointer;">
+        <div style="font-size:14px;color:var(--navy);margin-bottom:6px;">&#128193; Klik om vragen-JSON te selecteren</div>
+        <input type="file" accept=".json" id="wiz-vragen-input" style="display:none;">
+      </label>
+    </div>
+    <div id="wiz-vragen-status" style="margin-top:8px;font-size:12px;"></div>
+  </div>
+  <div class="card" id="wiz-opdrachten-card" style="display:none;">
+    <div class="card-title">Huiswerkopdrachten importeren</div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:10px;">JSON met de lijst van opdrachten voor de inspanningscomponent.</div>
+    <div class="upload-zone">
+      <label style="cursor:pointer;">
+        <div style="font-size:14px;color:var(--navy);margin-bottom:6px;">&#128193; Klik om opdrachten-JSON te selecteren</div>
+        <input type="file" accept=".json" id="wiz-opdrachten-input" style="display:none;">
+      </label>
+    </div>
+    <div id="wiz-opdrachten-status" style="margin-top:8px;font-size:12px;"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Studenten importeren</div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:10px;">JSON-array met student-id, achternaam, voornaam, klas.</div>
+    <div class="upload-zone">
+      <label style="cursor:pointer;">
+        <div style="font-size:14px;color:var(--navy);margin-bottom:6px;">&#128193; Klik om studenten-JSON te selecteren</div>
+        <input type="file" accept=".json" id="wiz-studenten-input" style="display:none;">
+      </label>
+    </div>
+    <div id="wiz-studenten-status" style="margin-top:8px;font-size:12px;"></div>
+  </div>
+  <div class="btn-row">
+    <button class="btn btn-ghost" onclick="showScreen('s-wiz1')">&larr; Terug</button>
+    <button class="btn btn-primary" onclick="wizNaarStap3()">Volgende: historisch &rsaquo;</button>
+  </div>
+</div>
+
+<!-- ═══ WIZARD STAP 3: HISTORISCH (OPTIONEEL) ═══ -->
+<div class="screen" id="s-wiz3">
+  <div class="wiz-stepper">
+    <div class="wiz-step-col"><div class="wiz-dot done">&#10003;</div><div class="wiz-label">Algemeen</div></div>
+    <div class="wiz-line done"></div>
+    <div class="wiz-step-col"><div class="wiz-dot done">&#10003;</div><div class="wiz-label">Inhoud</div></div>
+    <div class="wiz-line done"></div>
+    <div class="wiz-step-col"><div class="wiz-dot active">3</div><div class="wiz-label active">Historisch</div></div>
+  </div>
+  <div class="optional-banner">&#8505; Optioneel — alleen nodig als je al eerder studenten voor deze toets hebt gecorrigeerd in een oudere versie van de tool.</div>
+  <div class="card">
+    <div class="card-title">Migratiebestand importeren</div>
+    <div class="upload-zone">
+      <label style="cursor:pointer;">
+        <div style="font-size:14px;color:var(--navy);margin-bottom:6px;">&#128193; Klik om een resultaten-JSON te selecteren</div>
+        <input type="file" accept=".json" id="wiz-migratie-input" style="display:none;">
+      </label>
+    </div>
+    <div id="wiz-migratie-status" style="margin-top:8px;font-size:12px;"></div>
+  </div>
+  <div class="btn-row">
+    <button class="btn btn-ghost" onclick="showScreen('s-wiz2')">&larr; Terug</button>
+    <button class="btn btn-primary" onclick="wizVoltooien()">Toets aanmaken &rsaquo;</button>
+  </div>
+</div>
+
+<!-- ═══ SCHERM: STUDENT SELECTEREN ═══ -->
+<div class="screen" id="s-student">
+  <div class="card">
+    <div class="card-title" id="student-toets-titel">Selecteer student</div>
+    <div class="field-grid" style="margin-bottom:12px;">
+      <div><label>Filter op klas</label><select id="filter-klas"><option value="">Alle klassen</option></select></div>
+      <div id="herkansing-select-wrap" style="display:none;"><label>Herkansing?</label><select id="herkansing-select"><option value="0">Nee — eerste kans</option><option value="1">Ja — herkansing</option></select></div>
+    </div>
+    <div id="student-keuze-lijst" style="display:flex;flex-direction:column;gap:4px;max-height:400px;overflow-y:auto;"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Eerder gecorrigeerde studenten</div>
+    <div id="student-list-container"></div>
+  </div>
+</div>
+
+<!-- ═══ SCHERM: DYNAMISCH BLOK (hergebruikt voor elk blok/component) ═══ -->
+<div class="screen" id="s-blok">
+  <div class="chip" id="chip-blok">&#128100; &mdash;</div>
+  <div class="toggle-row" id="mc-toggle-row" style="display:none;">
+    <div class="toggle-switch on" id="mc-toggle-switch" onclick="toggleMCWeergave()"><div class="toggle-knob"></div></div>
+    <span style="font-size:13px;">Compacte invoer</span>
+    <span style="font-size:11px;color:var(--muted);margin-left:auto;">Toggle toont vraagtekst en modelantwoord</span>
+  </div>
+  <div class="card">
+    <div class="blok-hdr">
+      <div class="blok-name" id="blok-naam-titel">&mdash;</div>
+      <div class="blok-sub" id="blok-subtotaal">&mdash;</div>
+    </div>
+    <div id="blok-vragen-container"></div>
+  </div>
+  <div class="btn-row">
+    <button class="btn btn-ghost" id="blok-terug-btn">&larr; Terug</button>
+    <button class="btn btn-primary" id="blok-volgende-btn">Volgende &rsaquo;</button>
+  </div>
+</div>
+
+<!-- ═══ SCHERM: HUISWERK/INSPANNING ═══ -->
+<div class="screen" id="s-huiswerk">
+  <div class="chip" id="chip-huiswerk">&#128100; &mdash;</div>
+  <div class="card">
+    <div class="blok-hdr">
+      <div class="blok-name" id="huiswerk-titel">Huiswerkopdrachten</div>
+      <div class="blok-sub" id="huiswerk-sub">&mdash;</div>
+    </div>
+    <div id="huiswerk-readonly-notice" style="display:none;font-size:12px;color:#854F0B;background:var(--lt-gold);border-radius:var(--radius);padding:10px 12px;margin-bottom:12px;"></div>
+    <div id="huiswerk-vragen-container"></div>
+  </div>
+  <div class="btn-row">
+    <button class="btn btn-ghost" id="huiswerk-terug-btn">&larr; Terug</button>
+    <button class="btn btn-primary" id="huiswerk-volgende-btn">Bekijk resultaat &rsaquo;</button>
+  </div>
+</div>
+
+<!-- ═══ SCHERM: RESULTAAT ═══ -->
+<div class="screen" id="s-resultaat">
+  <div class="chip" id="chip-resultaat">&#128100; &mdash;</div>
+  <div id="validatie-checklist"></div>
+  <div id="hk-vergelijk-panel" style="display:none;" class="hk-panel">
+    <div class="hk-panel-title">&#128260; Beide resultaten voor deze student</div>
+    <div id="hk-vergelijk-content"></div>
+  </div>
+  <div class="card" id="result-header">
+    <div style="display:flex;gap:2rem;align-items:center;flex-wrap:wrap;">
+      <div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:4px;" id="result-cijfer-label">Eindcijfer</div>
+        <div class="cijfer-display" id="result-cijfer">&mdash;</div>
+        <div style="font-size:13px;font-weight:bold;margin-top:6px;" id="result-verdict">&mdash;</div>
+      </div>
+      <div style="flex:1;min-width:200px;">
+        <div id="result-component-labels" style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:3px;flex-wrap:wrap;gap:6px;"></div>
+        <div class="bar-wrap"><div class="bar-inner" id="result-bar" style="width:0%;"></div></div>
+        <div style="font-size:12px;color:var(--muted);margin-top:6px;" id="result-pct">&mdash;</div>
+      </div>
+    </div>
+  </div>
+  <div class="metric-grid" id="result-blokken"></div>
+  <div class="card" id="result-analyse">
+    <div class="card-title">Analyse en herkansingsadvies</div>
+    <div id="analyse-content"></div>
+    <div class="advies-box" id="advies-content"></div>
+  </div>
+  <div class="btn-row">
+    <button class="btn btn-ghost" id="resultaat-terug-btn">&larr; Scores aanpassen</button>
+    <button class="btn btn-orange" onclick="clearStudent()" style="margin-right:auto;">&#10006; Wis scores deze student</button>
+    <button class="btn btn-gold" onclick="printPDF()">&#128438; Download als PDF</button>
+    <button class="btn btn-primary" onclick="terugNaarStudentScherm()">Nieuwe student &rsaquo;</button>
+  </div>
+</div>
+
+<!-- ═══ SCHERM: KLASOVERZICHT ═══ -->
+<div class="screen" id="s-klas">
+  <div class="card">
+    <div class="blok-hdr">
+      <div class="blok-name" id="klas-titel">Klasoverzicht</div>
+      <div style="font-size:12px;color:var(--muted);" id="klas-stats">&mdash;</div>
+    </div>
+    <div style="overflow-x:auto;">
+      <table class="klas-tbl" id="klas-table">
+        <thead><tr id="klas-thead-row"></tr></thead>
+        <tbody id="klas-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+  <div class="card" id="klas-analyse-card">
+    <div class="card-title">Klaspatroon</div>
+    <div id="klas-patroon"></div>
+  </div>
+  <div class="card">
+    <div class="scenario-wrap" id="scenario-wrap">
+      <div class="scenario-title">&#127918; Scenariomodus &mdash; wat als de weging anders was? (read-only analyse)</div>
+      <div id="scenario-sliders"></div>
+      <div style="font-size:12px;color:#854F0B;margin-top:6px;" id="scenario-warning"></div>
+      <div id="scenario-tabel" style="margin-top:10px;"></div>
+    </div>
+  </div>
+  <div class="btn-row">
+    <button class="btn btn-ghost" onclick="terugNaarStudentScherm()">&larr; Nieuwe student</button>
+    <button class="btn btn-gold" onclick="exportCSV()">&#128190; Exporteer CSV</button>
+    <button class="btn btn-gold" onclick="exportJSON()">&#128196; Exporteer JSON</button>
+    <button class="btn btn-red" onclick="clearAllData()" style="margin-right:auto;">&#128465; Verwijder alle data deze toets</button>
+  </div>
+</div>
+
+</div><!-- /container -->
+
+<script>
+// ═══════════════════════════════════════════════════════════
+// NATIN CORRIGEERTOOL V6 — MULTI-TOETS ENGINE
+// ═══════════════════════════════════════════════════════════
+
+// ── STORAGE ABSTRACTIELAAG ──────────────────────────────────
+// Alle opslag loopt via deze laag. Toekomstige migratie naar een
+// echte database vereist alleen aanpassing van deze vier functies.
+const Store = {
+  get(key) {
+    try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : null; }
+    catch(e) { return null; }
+  },
+  set(key, val) {
+    try { localStorage.setItem(key, JSON.stringify(val)); return true; }
+    catch(e) { return false; }
+  },
+  remove(key) { try { localStorage.removeItem(key); } catch(e) {} }
+};
+
+function getToetsenIndex() { return Store.get('natin_toetsen_index') || []; }
+function saveToetsenIndex(idx) { Store.set('natin_toetsen_index', idx); }
+function getToetsData(toetsId) { return Store.get('natin_toets_' + toetsId); }
+function saveToetsData(toetsId, data) { Store.set('natin_toets_' + toetsId, data); }
+function removeToetsData(toetsId) { Store.remove('natin_toets_' + toetsId); }
+
+// ── STATE ─────────────────────────────────────────────────
+let huidigeToetsId = null;   // welke toets is actief geopend
+let huidigeConfig = null;    // config van de actieve toets
+let huidigeStudent = null;   // { id, achternaam, voornaam, klas, herkansing }
+let huidigeScores = {};      // { componentId: { blokId_of_vraagId: score } }
+let huidigeKeuzes = {};      // MC keuzes per vraag
+let dynamischeSchermen = []; // array van { screenType, componentId, blokId } voor navigatie
+let huidigSchermIndex = 0;
+
+// ── CIJFERBEREKENING (generiek) ──────────────────────────────
+function berekenCijferStaffel(totaal, cesuurPt, maxPunten) {
+  if (totaal <= 0) return 1.0;
+  if (totaal >= maxPunten) return 10.0;
+  let c = totaal <= cesuurPt
+    ? 1.0 + (totaal / cesuurPt) * 4.5
+    : 5.5 + ((totaal - cesuurPt) / (maxPunten - cesuurPt)) * 4.5;
+  return Math.round(c * 10) / 10;
+}
+
+function berekenBlokScore(scores, blok) {
+  return blok.vragen.reduce((s, q) => s + (scores[q.id] || 0), 0);
+}
+function berekenBlokMax(blok) {
+  return blok.vragen.reduce((s, q) => s + q.max, 0);
+}
+
+function berekenToetsComponentCijfer(scores, component, cesuurPct, maxPunten) {
+  const totaal = component.blokken.reduce((s, blok) => s + berekenBlokScore(scores, blok), 0);
+  const cesuurPt = Math.round(maxPunten * cesuurPct / 100);
+  return { totaal, cijfer: berekenCijferStaffel(totaal, cesuurPt, maxPunten), cesuurPt };
+}
+
+function berekenInspanningCijfer(hwScores, opdrachten) {
+  if (!opdrachten || opdrachten.length === 0) return 0;
+  const scores = opdrachten.map(o => {
+    const v = hwScores[o.id];
+    return v === 's' ? 1.0 : v === 'm' ? 0.5 : 0.0;
+  });
+  const gem = scores.reduce((a, b) => a + b, 0) / scores.length;
+  return Math.round(gem * 10 * 10) / 10;
+}
+
+function berekenEindcijfer(componentCijfers, componenten) {
+  const ec = componenten.reduce((s, c) => s + (componentCijfers[c.id] || 0) * (c.weging / 100), 0);
+  return Math.round(ec * 10) / 10;
+}
+
+function getSleutel(vraag) {
+  return vraag.model.trim().charAt(0).toUpperCase();
+}
+
+function getScoreLevels(max) {
+  if (max === 1) return [[1,'Goed (1)','ok'],[0,'Fout (0)','bad']];
+  if (max === 2) return [[2,'Goed (2)','ok'],[1,'Gedeeltelijk (1)','half'],[0,'Fout (0)','bad']];
+  if (max === 4) return [[4,'Volledig (4)','ok'],[2,'Gedeeltelijk (2)','half'],[0,'Onvoldoende (0)','bad']];
+  if (max === 5) return [[5,'Volledig (5)','ok'],[3,'Grotendeels (3)','half'],[1,'Veel fouten (1)','bad'],[0,'Niet gemaakt (0)','bad']];
+  // Generieke fallback voor andere max-waarden
+  const half = Math.round(max/2);
+  return [[max,'Volledig ('+max+')','ok'],[half,'Gedeeltelijk ('+half+')','half'],[0,'Onvoldoende (0)','bad']];
+}
+
+
+// ── TOETSENBEHEER (landing scherm) ──────────────────────────
+function renderToetsenLijst() {
+  const idx = getToetsenIndex();
+  const el = document.getElementById('toetsen-lijst');
+  if (idx.length === 0) {
+    el.innerHTML = '<div style="font-size:13px;color:var(--muted);text-align:center;padding:20px 0;">Nog geen toetsen geladen. Klik hieronder om een toetsconfig te uploaden.</div>';
+    return;
+  }
+  el.innerHTML = idx.map(t => {
+    const data = getToetsData(t.toets_id);
+    const aantal = data ? data.studenten_data.length : 0;
+    const hkBadge = t.herkansing_van ? `<span class="badge-hk">Herkansing van: ${t.herkansing_van_naam || t.herkansing_van}</span>` : '';
+    return `<div class="toets-card">
+      <div class="toets-info">
+        <div class="toets-naam">${t.toets_naam}${hkBadge}</div>
+        <div class="toets-meta">${t.module || ''} · ${aantal} student(en) gecorrigeerd · cesuur ${t.cesuur_pct}%</div>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-primary" onclick="openToets('${t.toets_id}')">Openen</button>
+        <button class="btn btn-red" onclick="verwijderToets('${t.toets_id}')">Verwijder</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function laadResultatenImport(file) {
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    let migratie;
+    try { migratie = JSON.parse(e.target.result); }
+    catch(err) { toonUploadStatus('Ongeldige JSON: ' + err.message, true); return; }
+
+    if (!migratie.toets_id || !migratie.studenten_data) {
+      toonUploadStatus('Bestand mist toets_id of studenten_data — geen geldig resultatenbestand.', true);
+      return;
+    }
+    const data = getToetsData(migratie.toets_id);
+    if (!data) {
+      toonUploadStatus('Geen toets met ID "' + migratie.toets_id + '" gevonden. Laad eerst de bijbehorende toetsconfig.', true);
+      return;
+    }
+
+    let toegevoegd = 0;
+    migratie.studenten_data.forEach(s => {
+      if (!data.studenten_data.find(x => x.id === s.id)) {
+        data.studenten_data.push(s);
+        toegevoegd++;
+      }
+    });
+    saveToetsData(migratie.toets_id, data);
+    toonUploadStatus('✓ ' + toegevoegd + ' student(en) geïmporteerd voor toets "' + migratie.toets_id + '".', false);
+    renderToetsenLijst();
+  };
+  reader.readAsText(file, 'UTF-8');
+}
+
+function toggleAdvancedUpload() {
+  const el = document.getElementById('advanced-upload-wrap');
+  el.style.display = el.style.display === 'none' ? 'block' : 'none';
+}
+
+// ── WIZARD: NIEUWE TOETS AANMAKEN ────────────────────────────
+let wizardState = {};
+
+function startWizard() {
+  wizardState = {
+    componenten: [
+      { naam: 'Schriftelijke toets', type: 'toets', weging: 80 },
+      { naam: 'Huiswerkopdrachten', type: 'inspanning', weging: 20 }
+    ],
+    blokken: null,
+    opdrachten: null,
+    studenten: null
+  };
+  document.getElementById('wiz-toets-id').value = '';
+  document.getElementById('wiz-toets-naam').value = '';
+  document.getElementById('wiz-module').value = '';
+  document.getElementById('wiz-datum').value = '';
+  document.getElementById('wiz-max-punten').value = '52';
+  document.getElementById('wiz-cesuur').value = '65';
+  renderWizComponenten();
+  showScreen('s-wiz1');
+}
+
+function renderWizComponenten() {
+  const el = document.getElementById('wiz-componenten-lijst');
+  el.innerHTML = wizardState.componenten.map((c, i) => `
+    <div class="comp-row">
+      <input type="text" value="${c.naam}" onchange="wizUpdateComponent(${i},'naam',this.value)">
+      <select onchange="wizUpdateComponent(${i},'type',this.value)">
+        <option value="toets" ${c.type==='toets'?'selected':''}>Toets</option>
+        <option value="inspanning" ${c.type==='inspanning'?'selected':''}>Inspanning</option>
+      </select>
+      <input type="number" value="${c.weging}" onchange="wizUpdateComponent(${i},'weging',parseInt(this.value))">
+      <span style="font-size:12px;color:var(--muted);">%</span>
+      <button class="btn btn-ghost" style="padding:4px 8px;font-size:11px;" onclick="wizVerwijderComponent(${i})">&#10006;</button>
+    </div>`).join('');
+  wizUpdateWegingIndicator();
+}
+
+function wizUpdateComponent(i, veld, waarde) {
+  wizardState.componenten[i][veld] = waarde;
+  wizUpdateWegingIndicator();
+}
+function wizVoegComponentToe() {
+  wizardState.componenten.push({ naam: 'Nieuw component', type: 'toets', weging: 0 });
+  renderWizComponenten();
+}
+function wizVerwijderComponent(i) {
+  wizardState.componenten.splice(i, 1);
+  renderWizComponenten();
+}
+function wizUpdateWegingIndicator() {
+  const totaal = wizardState.componenten.reduce((s,c) => s + (c.weging||0), 0);
+  const el = document.getElementById('wiz-weging-indicator');
+  el.innerHTML = totaal === 100
+    ? '<span class="weging-indicator weging-ok">&#10003; Weging telt op tot 100%</span>'
+    : '<span class="weging-indicator weging-bad">&#9888; Weging telt op tot ' + totaal + '%, moet 100% zijn</span>';
+}
+
+function wizNaarStap2() {
+  const id = document.getElementById('wiz-toets-id').value.trim();
+  const naam = document.getElementById('wiz-toets-naam').value.trim();
+  if (!id || !naam) { alert('Vul minimaal toets-ID en naam in.'); return; }
+  const totaal = wizardState.componenten.reduce((s,c) => s + (c.weging||0), 0);
+  if (totaal !== 100) { alert('Weging van componenten moet optellen tot 100% (nu ' + totaal + '%).'); return; }
+
+  wizardState.toets_id = id;
+  wizardState.toets_naam = naam;
+  wizardState.module = document.getElementById('wiz-module').value.trim();
+  wizardState.datum = document.getElementById('wiz-datum').value.trim();
+  wizardState.max_punten = parseInt(document.getElementById('wiz-max-punten').value);
+  wizardState.cesuur_pct = parseInt(document.getElementById('wiz-cesuur').value);
+
+  const heeftInspanning = wizardState.componenten.some(c => c.type === 'inspanning');
+  document.getElementById('wiz-opdrachten-card').style.display = heeftInspanning ? 'block' : 'none';
+  showScreen('s-wiz2');
+}
+
+function wizLaadVragen(file) {
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (!data.blokken || !Array.isArray(data.blokken)) {
+        wizStatus('wiz-vragen-status', 'Bestand mist een "blokken" array.', true); return;
+      }
+      wizardState.blokken = data.blokken;
+      const aantalVragen = data.blokken.reduce((s,b) => s + b.vragen.length, 0);
+      wizStatus('wiz-vragen-status', '✓ ' + data.blokken.length + ' blokken, ' + aantalVragen + ' vragen geladen.', false);
+    } catch(err) { wizStatus('wiz-vragen-status', 'Ongeldige JSON: ' + err.message, true); }
+  };
+  reader.readAsText(file, 'UTF-8');
+}
+
+function wizLaadOpdrachten(file) {
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const data = JSON.parse(e.target.result);
+      const opdrachten = Array.isArray(data) ? data : data.opdrachten;
+      if (!opdrachten || !Array.isArray(opdrachten)) {
+        wizStatus('wiz-opdrachten-status', 'Bestand moet een array van opdrachten bevatten.', true); return;
+      }
+      wizardState.opdrachten = opdrachten;
+      wizStatus('wiz-opdrachten-status', '✓ ' + opdrachten.length + ' opdrachten geladen.', false);
+    } catch(err) { wizStatus('wiz-opdrachten-status', 'Ongeldige JSON: ' + err.message, true); }
+  };
+  reader.readAsText(file, 'UTF-8');
+}
+
+function wizLaadStudenten(file) {
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const data = JSON.parse(e.target.result);
+      const studenten = Array.isArray(data) ? data : data.studenten;
+      if (!studenten || !Array.isArray(studenten)) {
+        wizStatus('wiz-studenten-status', 'Bestand moet een array van studenten bevatten.', true); return;
+      }
+      wizardState.studenten = studenten;
+      const klassen = [...new Set(studenten.map(s => s.klas))];
+      wizStatus('wiz-studenten-status', '✓ ' + studenten.length + ' studenten geladen — ' + klassen.length + ' klas(sen).', false);
+    } catch(err) { wizStatus('wiz-studenten-status', 'Ongeldige JSON: ' + err.message, true); }
+  };
+  reader.readAsText(file, 'UTF-8');
+}
+
+function wizStatus(elId, msg, isError) {
+  document.getElementById(elId).innerHTML = '<span style="color:' + (isError ? 'var(--red)' : 'var(--green)') + '">' + msg + '</span>';
+}
+
+function wizNaarStap3() {
+  if (!wizardState.blokken) { alert('Upload eerst de vragen-JSON.'); return; }
+  if (!wizardState.studenten) { alert('Upload eerst de studenten-JSON.'); return; }
+  const heeftInspanning = wizardState.componenten.some(c => c.type === 'inspanning');
+  if (heeftInspanning && !wizardState.opdrachten) { alert('Upload eerst de opdrachten-JSON voor het inspanningscomponent.'); return; }
+  showScreen('s-wiz3');
+}
+
+let wizMigratieData = null;
+function wizLaadMigratie(file) {
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (!data.studenten_data) { wizStatus('wiz-migratie-status', 'Bestand mist studenten_data.', true); return; }
+      wizMigratieData = data;
+      wizStatus('wiz-migratie-status', '✓ ' + data.studenten_data.length + ' eerdere studenten gevonden.', false);
+    } catch(err) { wizStatus('wiz-migratie-status', 'Ongeldige JSON: ' + err.message, true); }
+  };
+  reader.readAsText(file, 'UTF-8');
+}
+
+function wizVoltooien() {
+  const idx = getToetsenIndex();
+  if (idx.find(t => t.toets_id === wizardState.toets_id)) {
+    alert('Er bestaat al een toets met ID "' + wizardState.toets_id + '".'); return;
+  }
+
+  const componenten = wizardState.componenten.map((c, i) => {
+    const compId = c.type === 'toets' ? 'toets' : 'huiswerk';
+    if (c.type === 'toets') {
+      return { id: compId, naam: c.naam, type: 'toets', weging: c.weging, blokken: wizardState.blokken };
+    } else {
+      return { id: compId, naam: c.naam, type: 'inspanning', weging: c.weging, opdrachten: wizardState.opdrachten };
+    }
+  });
+
+  const config = {
+    toets_id: wizardState.toets_id,
+    toets_naam: wizardState.toets_naam,
+    module: wizardState.module,
+    academisch_jaar: '',
+    datum: wizardState.datum,
+    max_punten: wizardState.max_punten,
+    cesuur_pct: wizardState.cesuur_pct,
+    herkansing_van: null,
+    studenten: wizardState.studenten,
+    componenten: componenten
+  };
+
+  idx.push({ toets_id: config.toets_id, toets_naam: config.toets_naam, module: config.module, cesuur_pct: config.cesuur_pct, herkansing_van: null });
+  saveToetsenIndex(idx);
+  saveToetsData(config.toets_id, { config: config, studenten_data: [] });
+
+  if (wizMigratieData) {
+    const data = getToetsData(config.toets_id);
+    wizMigratieData.studenten_data.forEach(s => data.studenten_data.push(s));
+    saveToetsData(config.toets_id, data);
+  }
+
+  renderToetsenLijst();
+  showScreen('s-beheer');
+}
+
+function laadToetsConfig(file) {
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    let config;
+    try { config = JSON.parse(e.target.result); }
+    catch(err) { toonUploadStatus('Ongeldige JSON: ' + err.message, true); return; }
+
+    // Validatie
+    const idx = getToetsenIndex();
+    if (idx.find(t => t.toets_id === config.toets_id)) {
+      toonUploadStatus('Er bestaat al een toets met ID "' + config.toets_id + '". Verwijder eerst de bestaande of pas het ID aan.', true);
+      return;
+    }
+    const totaalWeging = config.componenten.reduce((s,c) => s + c.weging, 0);
+    const heeftEigenInspanning = config.componenten.some(c => c.type === 'inspanning');
+
+    if (config.herkansing_van && !heeftEigenInspanning) {
+      // Herkansing zonder eigen huiswerk-component: neemt gewicht over van de parent-toets.
+      // Controleer of eigen weging + overgenomen weging optelt tot 100%.
+      const parentEntry = idx.find(t => t.toets_id === config.herkansing_van);
+      if (!parentEntry) {
+        toonUploadStatus('Parent-toets "' + config.herkansing_van + '" is nog niet geladen. Laad eerst de originele toets.', true);
+        return;
+      }
+      const parentData = getToetsData(config.herkansing_van);
+      const parentInspanningComp = parentData?.config.componenten.find(c => c.type === 'inspanning');
+      const overgenomenWeging = parentInspanningComp ? parentInspanningComp.weging : 0;
+      const gecombineerd = totaalWeging + overgenomenWeging;
+      if (gecombineerd !== 100) {
+        toonUploadStatus('Eigen weging (' + totaalWeging + '%) + overgenomen huiswerkweging (' + overgenomenWeging + '%) telt op tot ' + gecombineerd + '%, moet 100% zijn.', true);
+        return;
+      }
+    } else if (totaalWeging !== 100) {
+      toonUploadStatus('Wegingen van componenten tellen op tot ' + totaalWeging + '%, moet 100% zijn.', true);
+      return;
+    }
+    // MC validatie
+    for (const comp of config.componenten) {
+      if (comp.type === 'toets') {
+        for (const blok of comp.blokken) {
+          if (blok.weergave === 'mc') {
+            for (const v of blok.vragen) {
+              const sleutel = v.model.trim().charAt(0).toUpperCase();
+              if (!['A','B','C','D','E'].includes(sleutel)) {
+                toonUploadStatus('Vraag ' + v.id + ' in blok ' + blok.id + ' heeft geen geldige MC-sleutel in het modelveld.', true);
+                return;
+              }
+            }
+          }
+        }
+      }
+    }
+
+    // Alles goed — toevoegen aan index
+    let herkansingVanNaam = null;
+    if (config.herkansing_van) {
+      const parent = idx.find(t => t.toets_id === config.herkansing_van);
+      herkansingVanNaam = parent ? parent.toets_naam : config.herkansing_van;
+    }
+
+    idx.push({
+      toets_id: config.toets_id,
+      toets_naam: config.toets_naam,
+      module: config.module,
+      cesuur_pct: config.cesuur_pct,
+      herkansing_van: config.herkansing_van || null,
+      herkansing_van_naam: herkansingVanNaam
+    });
+    saveToetsenIndex(idx);
+    saveToetsData(config.toets_id, { config: config, studenten_data: [] });
+
+    toonUploadStatus('✓ Toets "' + config.toets_naam + '" succesvol geladen.', false);
+    renderToetsenLijst();
+  };
+  reader.readAsText(file, 'UTF-8');
+}
+
+function toonUploadStatus(msg, isError) {
+  const el = document.getElementById('upload-status');
+  el.innerHTML = (isError ? '<span style="color:var(--red)">' : '<span style="color:var(--green)">') + msg + '</span>';
+}
+
+function verwijderToets(toetsId) {
+  if (!confirm('Verwijder deze toets inclusief alle gecorrigeerde studenten? Dit kan niet ongedaan worden gemaakt.')) return;
+  let idx = getToetsenIndex().filter(t => t.toets_id !== toetsId);
+  saveToetsenIndex(idx);
+  removeToetsData(toetsId);
+  renderToetsenLijst();
+}
+
+function openToets(toetsId) {
+  const data = getToetsData(toetsId);
+  if (!data) { alert('Toets niet gevonden.'); return; }
+  huidigeToetsId = toetsId;
+  huidigeConfig = data.config;
+  document.getElementById('student-toets-titel').textContent = 'Selecteer student — ' + huidigeConfig.toets_naam;
+  bouwKlasFilter();
+  bouwStudentKeuzeLijst();
+  document.getElementById('progressbar').style.display = 'flex';
+  showScreen('s-student');
+}
+
+// ── STUDENTSELECTIE ──────────────────────────────────────────
+function bouwKlasFilter() {
+  const select = document.getElementById('filter-klas');
+  select.innerHTML = '<option value="">Alle klassen</option>';
+  const isHerkansing = !!huidigeConfig.herkansing_van;
+
+  let klassen;
+  if (isHerkansing) {
+    // Herkansing heeft geen eigen studentenlijst — haal klassen uit de parent-toets
+    const parentData = getToetsData(huidigeConfig.herkansing_van);
+    klassen = [...new Set((parentData?.studenten_data || []).map(s => s.klas))];
+    document.getElementById('herkansing-select-wrap').style.display = 'none';
+  } else {
+    klassen = [...new Set(huidigeConfig.studenten.map(s => s.klas))];
+    document.getElementById('herkansing-select-wrap').style.display = 'block';
+  }
+  klassen.sort().forEach(k => {
+    const opt = document.createElement('option');
+    opt.value = k; opt.textContent = k;
+    select.appendChild(opt);
+  });
+  select.onchange = bouwStudentKeuzeLijst;
+}
+
+function getBeschikbareStudenten() {
+  const isHerkansing = !!huidigeConfig.herkansing_van;
+  if (isHerkansing) {
+    // Studenten komen uit de parent-toets (degenen die al gecorrigeerd zijn)
+    const parentData = getToetsData(huidigeConfig.herkansing_van);
+    if (!parentData) return [];
+    return parentData.studenten_data.map(s => ({ id: s.id, achternaam: s.achternaam, voornaam: s.voornaam, klas: s.klas }));
+  }
+  return huidigeConfig.studenten;
+}
+
+function bouwStudentKeuzeLijst() {
+  const filter = document.getElementById('filter-klas').value;
+  const alleStudenten = getBeschikbareStudenten();
+  const huidigeData = getToetsData(huidigeToetsId);
+  const gecorrigeerdIds = (huidigeData.studenten_data || []).map(s => s.id);
+
+  const lijst = document.getElementById('student-keuze-lijst');
+  lijst.innerHTML = '';
+  alleStudenten
+    .filter(s => !filter || s.klas === filter)
+    .sort((a,b) => a.achternaam.localeCompare(b.achternaam))
+    .forEach(s => {
+      const gedaan = gecorrigeerdIds.includes(s.id);
+      const row = document.createElement('div');
+      row.style.cssText = 'display:flex;justify-content:space-between;align-items:center;padding:8px 10px;border-radius:6px;border:1px solid var(--border);background:' + (gedaan ? 'var(--lt-green)' : 'var(--white)') + ';gap:10px;';
+      row.innerHTML = `<div><span style="font-size:13px;font-weight:bold;color:var(--navy);">${s.achternaam}, ${s.voornaam}</span><span style="font-size:11px;color:var(--muted);margin-left:8px;">${s.klas}</span>${gedaan?'<span style="font-size:11px;color:var(--green);margin-left:6px;">&#10003; gecorrigeerd</span>':''}</div><button class="btn btn-primary" style="padding:5px 12px;font-size:12px;" onclick="startStudent('${s.id}')">${gedaan?'Heropen':'Corrigeren'}</button>`;
+      lijst.appendChild(row);
+    });
+
+  renderEerderGecorrigeerd();
+}
+
+function renderEerderGecorrigeerd() {
+  const data = getToetsData(huidigeToetsId);
+  const el = document.getElementById('student-list-container');
+  const arr = data.studenten_data || [];
+  if (arr.length === 0) {
+    el.innerHTML = '<div style="font-size:13px;color:var(--muted);text-align:center;padding:20px 0;">Nog geen studenten gecorrigeerd voor deze toets.</div>';
+    return;
+  }
+  el.innerHTML = arr.map(s => {
+    const ec = s.eindcijfer;
+    return `<div class="student-list-item">
+      <div>
+        <div style="font-size:13px;font-weight:bold;">${s.achternaam}, ${s.voornaam}</div>
+        <div style="font-size:12px;color:var(--muted);">${s.klas} · Eindcijfer: ${ec != null ? ec.toFixed(1) : '—'}</div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <span class="pill ${ec>=5.5?'pill-v':'pill-o'}">${ec != null ? ec.toFixed(1) : '—'}</span>
+        <button class="link-btn" onclick="loadStudentResultaat('${s.id}')">Heropen</button>
+        <button class="link-btn-red" onclick="deleteStudentUitToets('${s.id}')">&#128465;</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function deleteStudentUitToets(studentId) {
+  if (!confirm('Verwijder deze student uit deze toets?')) return;
+  const data = getToetsData(huidigeToetsId);
+  data.studenten_data = data.studenten_data.filter(s => s.id !== studentId);
+  saveToetsData(huidigeToetsId, data);
+  bouwStudentKeuzeLijst();
+}
+
+// ── START CORRECTIE ──────────────────────────────────────────
+function startStudent(studentId) {
+  const data = getToetsData(huidigeToetsId);
+  const bestaand = (data.studenten_data || []).find(s => s.id === studentId);
+  if (bestaand) { loadStudentResultaat(studentId); return; }
+
+  const beschikbaar = getBeschikbareStudenten().find(s => s.id === studentId);
+  if (!beschikbaar) return;
+
+  huidigeStudent = { ...beschikbaar, herkansing: document.getElementById('herkansing-select')?.value === '1' };
+  huidigeScores = {};
+  huidigeKeuzes = {};
+
+  bouwSchermenLijst();
+  bouwNavigatiebalk();
+  updateChip();
+  goNaarSchermIndex(0);
+}
+
+// Bouw de lijst van dynamische schermen op basis van de componenten in de config
+function bouwSchermenLijst() {
+  dynamischeSchermen = [];
+  huidigeConfig.componenten.forEach(comp => {
+    if (comp.type === 'toets') {
+      comp.blokken.forEach(blok => {
+        dynamischeSchermen.push({ screenType: 'blok', componentId: comp.id, blok: blok });
+      });
+    } else if (comp.type === 'inspanning') {
+      dynamischeSchermen.push({ screenType: 'huiswerk', componentId: comp.id, component: comp });
+    }
+  });
+}
+
+function bouwNavigatiebalk() {
+  const container = document.getElementById('nav-dynamic-container');
+  container.innerHTML = '';
+  dynamischeSchermen.forEach((s, i) => {
+    const naam = s.screenType === 'blok' ? s.blok.naam : (s.component.naam || 'Huiswerk');
+    const btn = document.createElement('div');
+    btn.className = 'step';
+    btn.id = 'nav-dyn-' + i;
+    btn.textContent = naam;
+    btn.onclick = () => goNaarSchermIndex(i);
+    container.appendChild(btn);
+    if (i < dynamischeSchermen.length - 1) {
+      const arr = document.createElement('div');
+      arr.className = 'arr'; arr.textContent = '›';
+      container.appendChild(arr);
+    }
+  });
+}
+
+function updateChip() {
+  const naam = huidigeStudent.achternaam + ', ' + huidigeStudent.voornaam + ' — ' + huidigeStudent.klas;
+  ['chip-blok','chip-huiswerk','chip-resultaat'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = '👤 ' + naam;
+  });
+}
+
+// ── NAVIGATIE TUSSEN DYNAMISCHE SCHERMEN ────────────────────
+function goNaarSchermIndex(i) {
+  if (i < 0 || i >= dynamischeSchermen.length) {
+    if (i >= dynamischeSchermen.length) {
+      const ontbrekend = berekenOntbrekendeVragen();
+      const totaal = Object.values(ontbrekend).reduce((s, arr) => s + arr.length, 0);
+      if (totaal > 0) {
+        const doorgaan = confirm(totaal + ' vraag' + (totaal===1?'':'en') + ' zijn nog niet beantwoord. Toch doorgaan naar het resultaat?');
+        if (!doorgaan) return;
+      }
+      toonResultaat();
+      return;
+    }
+    return;
+  }
+  huidigSchermIndex = i;
+  const s = dynamischeSchermen[i];
+
+  document.querySelectorAll('#nav-dynamic-container .step').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.step').forEach(el => el.classList.remove('active'));
+  const navEl = document.getElementById('nav-dyn-' + i);
+  if (navEl) navEl.classList.add('active');
+
+  if (s.screenType === 'blok') {
+    renderBlokScherm(s);
+    showScreen('s-blok');
+  } else if (s.screenType === 'huiswerk') {
+    renderHuiswerkScherm(s);
+    showScreen('s-huiswerk');
+  }
+}
+
+let mcWeergaveModus = 'compact'; // 'compact' of 'volledig'
+
+function renderBlokScherm(schermInfo) {
+  const blok = schermInfo.blok;
+  document.getElementById('blok-naam-titel').textContent = blok.naam;
+  const container = document.getElementById('blok-vragen-container');
+  container.innerHTML = '';
+
+  const toggleRow = document.getElementById('mc-toggle-row');
+  toggleRow.style.display = blok.weergave === 'mc' ? 'flex' : 'none';
+  document.getElementById('mc-toggle-switch').classList.toggle('on', mcWeergaveModus === 'compact');
+
+  if (blok.weergave === 'mc' && mcWeergaveModus === 'compact') {
+    blok.vragen.forEach(q => {
+      const sleutel = getSleutel(q);
+      container.innerHTML += `<div class="mc-list-row" id="row-${q.id}">
+        <span class="mc-qid">${q.id}</span>
+        <span class="mc-qtext">${q.text}</span>
+        <div class="mc-abc" id="btns-${q.id}">
+          ${['A','B','C'].map(letter => `<button data-keuze="${letter}" onclick="setMCScore('${schermInfo.componentId}','${q.id}','${letter}','${sleutel}')">${letter}</button>`).join('')}
+        </div>
+      </div>`;
+    });
+  } else {
+    blok.vragen.forEach(q => {
+      let scoreHtml;
+      if (blok.weergave === 'mc') {
+        const sleutel = getSleutel(q);
+        scoreHtml = `<div class="score-row"><div class="score-lbl">Antwoord student:</div>
+          <div class="score-btns" id="btns-${q.id}">
+            ${['A','B','C'].map(letter => `<button class="sc abc-btn" data-keuze="${letter}" onclick="setMCScore('${schermInfo.componentId}','${q.id}','${letter}','${sleutel}')">${letter}</button>`).join('')}
+          </div>
+          <div class="score-feedback" id="fb-${q.id}" style="font-size:12px;margin-left:10px;"></div></div>`;
+      } else {
+        const levels = getScoreLevels(q.max);
+        const btns = levels.map(([pt, lbl, cls]) =>
+          `<button class="sc" data-pt="${pt}" data-cls="${cls}" onclick="setOpenScore('${schermInfo.componentId}','${q.id}',${pt},'${cls}')">${lbl}</button>`
+        ).join('');
+        scoreHtml = `<div class="score-row"><div class="score-lbl">Score:</div><div class="score-btns" id="btns-${q.id}">${btns}</div></div>`;
+      }
+      container.innerHTML += `<div class="q-row" id="row-${q.id}">
+        <div class="q-header"><div class="q-badge">${q.id}</div><div class="q-text">${q.text}</div><div class="q-pts">${q.max} pt</div></div>
+        <div class="model-box"><div class="model-lbl">&#10003; Modelantwoord</div><div class="model-txt">${q.model}</div></div>
+        ${scoreHtml}
+      </div>`;
+    });
+  }
+
+  restoreBlokScores(schermInfo);
+  updateBlokSubtotaal(schermInfo);
+  updateValidatieChip();
+
+  document.getElementById('blok-terug-btn').onclick = () => goNaarSchermIndex(huidigSchermIndex - 1);
+  document.getElementById('blok-volgende-btn').onclick = () => { persistTussentijds(); goNaarSchermIndex(huidigSchermIndex + 1); };
+}
+
+function toggleMCWeergave() {
+  mcWeergaveModus = mcWeergaveModus === 'compact' ? 'volledig' : 'compact';
+  const s = dynamischeSchermen[huidigSchermIndex];
+  if (s) renderBlokScherm(s);
+}
+
+function restoreBlokScores(schermInfo) {
+  const compScores = huidigeScores[schermInfo.componentId] || {};
+  const compKeuzes = huidigeKeuzes[schermInfo.componentId] || {};
+  schermInfo.blok.vragen.forEach(q => {
+    const score = compScores[q.id];
+    if (score === undefined) return;
+    const container = document.getElementById('btns-' + q.id);
+    if (!container) return;
+    if (schermInfo.blok.weergave === 'mc') {
+      const keuze = compKeuzes[q.id];
+      if (!keuze) return;
+      const sleutel = getSleutel(q);
+      const correct = keuze === sleutel;
+      const btnSelector = mcWeergaveModus === 'compact' ? 'button' : '.abc-btn';
+      container.querySelectorAll(btnSelector).forEach(b => {
+        b.classList.remove('ok','bad');
+        if (b.dataset.keuze === keuze) b.classList.add(correct ? 'ok' : 'bad');
+      });
+      const fb = document.getElementById('fb-' + q.id);
+      if (fb) fb.innerHTML = correct ? '<span style="color:var(--green)">&#10003; Correct</span>' : '<span style="color:var(--red)">&#10007; Fout — correct was <strong>' + sleutel + '</strong></span>';
+    } else {
+      container.querySelectorAll('.sc').forEach(b => {
+        b.classList.remove('ok','half','bad');
+        if (parseInt(b.dataset.pt) === score) b.classList.add(b.dataset.cls);
+      });
+    }
+  });
+  markMissingRows(schermInfo);
+}
+
+function markMissingRows(schermInfo) {
+  const compScores = huidigeScores[schermInfo.componentId] || {};
+  schermInfo.blok.vragen.forEach(q => {
+    const row = document.getElementById('row-' + q.id);
+    if (!row) return;
+    row.classList.toggle('missing', compScores[q.id] === undefined);
+  });
+}
+
+function setMCScore(componentId, qId, keuze, sleutel) {
+  const correct = keuze === sleutel;
+  if (!huidigeScores[componentId]) huidigeScores[componentId] = {};
+  if (!huidigeKeuzes[componentId]) huidigeKeuzes[componentId] = {};
+  huidigeScores[componentId][qId] = correct ? 1 : 0;
+  huidigeKeuzes[componentId][qId] = keuze;
+
+  const container = document.getElementById('btns-' + qId);
+  const btnSelector = mcWeergaveModus === 'compact' ? 'button' : '.abc-btn';
+  container.querySelectorAll(btnSelector).forEach(b => {
+    b.classList.remove('ok','bad');
+    if (b.dataset.keuze === keuze) b.classList.add(correct ? 'ok' : 'bad');
+  });
+  const fb = document.getElementById('fb-' + qId);
+  if (fb) fb.innerHTML = correct ? '<span style="color:var(--green)">&#10003; Correct</span>' : '<span style="color:var(--red)">&#10007; Fout — correct was <strong>' + sleutel + '</strong></span>';
+
+  const row = document.getElementById('row-' + qId);
+  if (row) row.classList.remove('missing');
+
+  updateBlokSubtotaalVoorHuidigScherm();
+  updateValidatieChip();
+}
+
+function setOpenScore(componentId, qId, pt, cls) {
+  if (!huidigeScores[componentId]) huidigeScores[componentId] = {};
+  huidigeScores[componentId][qId] = pt;
+  const container = document.getElementById('btns-' + qId);
+  container.querySelectorAll('.sc').forEach(b => {
+    b.classList.remove('ok','half','bad');
+    if (parseInt(b.dataset.pt) === pt) b.classList.add(cls);
+  });
+
+  const row = document.getElementById('row-' + qId);
+  if (row) row.classList.remove('missing');
+
+  updateBlokSubtotaalVoorHuidigScherm();
+  updateValidatieChip();
+}
+
+function updateBlokSubtotaalVoorHuidigScherm() {
+  const s = dynamischeSchermen[huidigSchermIndex];
+  if (s && s.screenType === 'blok') updateBlokSubtotaal(s);
+}
+
+function updateBlokSubtotaal(schermInfo) {
+  const compScores = huidigeScores[schermInfo.componentId] || {};
+  const max = berekenBlokMax(schermInfo.blok);
+  const got = berekenBlokScore(compScores, schermInfo.blok);
+  document.getElementById('blok-subtotaal').textContent = got + ' / ' + max + ' pt';
+}
+
+// ── HUISWERK/INSPANNIE SCHERM ────────────────────────────────
+
+function renderHuiswerkScherm(schermInfo) {
+  const comp = schermInfo.component;
+  document.getElementById('huiswerk-titel').textContent = comp.naam;
+
+  const isHerkansing = !!huidigeConfig.herkansing_van;
+  const notice = document.getElementById('huiswerk-readonly-notice');
+  notice.style.display = 'none';
+
+  const container = document.getElementById('huiswerk-vragen-container');
+  container.innerHTML = '';
+
+  if (!huidigeScores[schermInfo.componentId]) huidigeScores[schermInfo.componentId] = {};
+  const hwScores = huidigeScores[schermInfo.componentId];
+
+  (comp.opdrachten || []).forEach(o => {
+    const huidig = hwScores[o.id] || '';
+    container.innerHTML += `<div class="insp-row" id="hwrow-${o.id}">
+      <div class="insp-naam">${o.naam}</div>
+      <div class="insp-btns">
+        <button class="insp-btn ${huidig==='s'?'sel-s':''}" data-waarde="s" onclick="setHW('${schermInfo.componentId}','${o.id}','s')">&#10003; Serieuze poging</button>
+        <button class="insp-btn ${huidig==='m'?'sel-m':''}" data-waarde="m" onclick="setHW('${schermInfo.componentId}','${o.id}','m')">~ Minimale poging</button>
+        <button class="insp-btn ${huidig==='n'?'sel-n':''}" data-waarde="n" onclick="setHW('${schermInfo.componentId}','${o.id}','n')">&#10007; Niet ingeleverd</button>
+      </div>
+    </div>`;
+  });
+  updateHuiswerkSub(schermInfo);
+  updateValidatieChip();
+
+  document.getElementById('huiswerk-terug-btn').onclick = () => goNaarSchermIndex(huidigSchermIndex - 1);
+  document.getElementById('huiswerk-volgende-btn').onclick = () => { persistTussentijds(); goNaarSchermIndex(huidigSchermIndex + 1); };
+}
+
+function setHW(componentId, opdrachtId, waarde) {
+  if (!huidigeScores[componentId]) huidigeScores[componentId] = {};
+  huidigeScores[componentId][opdrachtId] = waarde;
+  const rij = document.getElementById('hwrow-' + opdrachtId);
+  rij.querySelectorAll('.insp-btn').forEach(b => {
+    b.classList.remove('sel-s','sel-m','sel-n');
+    if (b.dataset.waarde === waarde) b.classList.add(waarde === 's' ? 'sel-s' : waarde === 'm' ? 'sel-m' : 'sel-n');
+  });
+
+  const s = dynamischeSchermen[huidigSchermIndex];
+  updateHuiswerkSub(s);
+  updateValidatieChip();
+}
+
+function updateHuiswerkSub(schermInfo) {
+  const hwScores = huidigeScores[schermInfo.componentId] || {};
+  const opdr = schermInfo.component.opdrachten || [];
+  const ingevuld = opdr.filter(o => hwScores[o.id]).length;
+  document.getElementById('huiswerk-sub').textContent = ingevuld + ' / ' + opdr.length;
+}
+
+// ── OPSLAAN + RESULTAAT ──────────────────────────────────────
+function berekenAlleComponentCijfers() {
+  // Retourneert { componentCijfers: {id: cijfer}, componentDetails: {id: {...}} }
+  const componentCijfers = {};
+  const componentDetails = {};
+  const isHerkansing = !!huidigeConfig.herkansing_van;
+
+  huidigeConfig.componenten.forEach(comp => {
+    if (comp.type === 'toets') {
+      const scores = huidigeScores[comp.id] || {};
+      const result = berekenToetsComponentCijfer(scores, comp, huidigeConfig.cesuur_pct, huidigeConfig.max_punten);
+      componentCijfers[comp.id] = result.cijfer;
+      componentDetails[comp.id] = { type: 'toets', ...result, blokken: comp.blokken.map(b => ({
+        id: b.id, naam: b.naam, score: berekenBlokScore(scores, b), max: berekenBlokMax(b)
+      })) };
+    } else if (comp.type === 'inspanning') {
+      const scores = huidigeScores[comp.id] || {};
+      const cijfer = berekenInspanningCijfer(scores, comp.opdrachten);
+      componentCijfers[comp.id] = cijfer;
+      componentDetails[comp.id] = { type: 'inspanning', cijfer };
+    }
+  });
+
+  // Als dit een herkansing is ZONDER eigen inspanning-component: hergebruik hw van parent
+  if (isHerkansing && !huidigeConfig.componenten.find(c => c.type === 'inspanning')) {
+    const parentData = getToetsData(huidigeConfig.herkansing_van);
+    const parentStudent = parentData ? parentData.studenten_data.find(s => s.id === huidigeStudent.id) : null;
+    if (parentStudent) {
+      const parentHwComp = Object.keys(parentStudent.component_cijfers || {}).find(cid => {
+        const pc = parentData.config.componenten.find(c => c.id === cid);
+        return pc && pc.type === 'inspanning';
+      });
+      if (parentHwComp) {
+        componentCijfers[parentHwComp] = parentStudent.component_cijfers[parentHwComp];
+        componentDetails[parentHwComp] = { type: 'inspanning', cijfer: parentStudent.component_cijfers[parentHwComp], overgenomen: true };
+        // Voeg parent se weging toe voor dat component
+        const parentComp = parentData.config.componenten.find(c => c.id === parentHwComp);
+        if (parentComp && !huidigeConfig.componenten.find(c => c.id === parentHwComp)) {
+          huidigeConfig._effectieveComponenten = huidigeConfig.componenten.concat([parentComp]);
+        }
+      }
+    }
+  }
+
+  const effectieveComponenten = huidigeConfig._effectieveComponenten || huidigeConfig.componenten;
+  const eindcijfer = berekenEindcijfer(componentCijfers, effectieveComponenten);
+
+  return { componentCijfers, componentDetails, eindcijfer, effectieveComponenten };
+}
+
+// ── VALIDATIE OVER ALLE ONDERDELEN ───────────────────────────
+function berekenOntbrekendeVragen() {
+  const ontbrekend = {}; // { componentNaam: [qid, ...] }
+  if (!huidigeConfig) return ontbrekend;
+
+  huidigeConfig.componenten.forEach(comp => {
+    if (comp.type === 'toets') {
+      comp.blokken.forEach(blok => {
+        const scores = huidigeScores[comp.id] || {};
+        const missend = blok.vragen.filter(q => scores[q.id] === undefined).map(q => q.id);
+        if (missend.length > 0) {
+          const key = blok.naam;
+          ontbrekend[key] = missend;
+        }
+      });
+    } else if (comp.type === 'inspanning') {
+      const scores = huidigeScores[comp.id] || {};
+      const opdrachten = comp.opdrachten || [];
+      const missend = opdrachten.filter(o => !scores[o.id]).map(o => o.id);
+      if (missend.length > 0) ontbrekend[comp.naam] = missend;
+    }
+  });
+  return ontbrekend;
+}
+
+function updateValidatieChip() {
+  const chip = document.getElementById('validatie-chip');
+  if (!huidigeStudent) { chip.style.display = 'none'; return; }
+  const ontbrekend = berekenOntbrekendeVragen();
+  const totaalOntbrekend = Object.values(ontbrekend).reduce((s, arr) => s + arr.length, 0);
+
+  chip.style.display = 'inline-block';
+  if (totaalOntbrekend === 0) {
+    chip.textContent = '✓ Alles ingevuld';
+    chip.classList.add('compleet');
+  } else {
+    chip.textContent = totaalOntbrekend + ' vraag' + (totaalOntbrekend === 1 ? '' : 'en') + ' open';
+    chip.classList.remove('compleet');
+  }
+}
+
+function toonValidatieOverzicht() {
+  const ontbrekend = berekenOntbrekendeVragen();
+  const totaal = Object.values(ontbrekend).reduce((s, arr) => s + arr.length, 0);
+  if (totaal === 0) { alert('Alle vragen zijn beantwoord.'); return; }
+  let msg = totaal + ' vraag' + (totaal === 1 ? '' : 'en') + ' nog niet beantwoord:\n\n';
+  Object.entries(ontbrekend).forEach(([naam, ids]) => {
+    msg += naam + ': ' + ids.join(', ') + '\n';
+  });
+  alert(msg);
+}
+
+function renderValidatieChecklist() {
+  const ontbrekend = berekenOntbrekendeVragen();
+  const totaal = Object.values(ontbrekend).reduce((s, arr) => s + arr.length, 0);
+  const el = document.getElementById('validatie-checklist');
+  if (!el) return;
+
+  if (totaal === 0) {
+    el.innerHTML = '';
+    return;
+  }
+
+  let html = '<div class="warn-banner"><div class="warn-title">&#9888; ' + totaal + ' vraag' + (totaal===1?'':'en') + ' nog niet beantwoord — verdeeld over ' + Object.keys(ontbrekend).length + ' onderdeel/onderdelen</div>';
+  Object.entries(ontbrekend).forEach(([naam, ids]) => {
+    html += '<div class="warn-item"><span>' + naam + '</span><span>' + ids.join(', ') + '</span></div>';
+  });
+  html += '</div>';
+  el.innerHTML = html;
+}
+
+function persistTussentijds() {
+  // Tussentijds opslaan zodat data niet verloren gaat bij navigeren
+  persistStudent();
+}
+
+
+function persistStudent() {
+  const { componentCijfers, eindcijfer } = berekenAlleComponentCijfers();
+
+  const entry = {
+    id: huidigeStudent.id,
+    achternaam: huidigeStudent.achternaam,
+    voornaam: huidigeStudent.voornaam,
+    klas: huidigeStudent.klas,
+    herkansing: huidigeStudent.herkansing || false,
+    scores: { ...huidigeScores },
+    scoreKeuzes: { ...huidigeKeuzes },
+    component_cijfers: componentCijfers,
+    eindcijfer
+  };
+
+  const data = getToetsData(huidigeToetsId);
+  const idx = data.studenten_data.findIndex(s => s.id === huidigeStudent.id);
+  if (idx >= 0) data.studenten_data[idx] = entry; else data.studenten_data.push(entry);
+  saveToetsData(huidigeToetsId, data);
+}
+
+function toonResultaat() {
+  persistStudent();
+  renderValidatieChecklist();
+  const { componentCijfers, componentDetails, eindcijfer, effectieveComponenten } = berekenAlleComponentCijfers();
+  const voldoende = eindcijfer >= 5.5;
+
+  document.getElementById('result-cijfer').textContent = eindcijfer.toFixed(1);
+  document.getElementById('result-cijfer').style.color = voldoende ? 'var(--green)' : 'var(--red)';
+  document.getElementById('result-verdict').textContent = voldoende ? '✓ Voldoende' : '✗ Onvoldoende';
+  document.getElementById('result-verdict').style.color = voldoende ? 'var(--green)' : 'var(--red)';
+
+  const labels = effectieveComponenten.map(c => {
+    const comp = huidigeConfig.componenten.find(x => x.id === c.id) || c;
+    return (comp.naam || c.id) + ' (' + c.weging + '%): ' + (componentCijfers[c.id] || 0).toFixed(1);
+  });
+  document.getElementById('result-component-labels').innerHTML = labels.map(l => '<span>' + l + '</span>').join('');
+  document.getElementById('result-bar').style.width = Math.min(100, Math.round((eindcijfer/10)*100)) + '%';
+  document.getElementById('result-bar').style.background = voldoende ? 'var(--green)' : 'var(--red)';
+
+  const toetsComp = huidigeConfig.componenten.find(c => c.type === 'toets');
+  const toetsDetail = componentDetails[toetsComp.id];
+  document.getElementById('result-pct').textContent = 'Toetsscore: ' + toetsDetail.totaal + '/' + huidigeConfig.max_punten + ' pt (' + Math.round(toetsDetail.totaal/huidigeConfig.max_punten*100) + '%) | Cesuur: ' + toetsDetail.cesuurPt + ' pt';
+
+  // Blok-metrics
+  const blokHtml = toetsDetail.blokken.map(b => {
+    const p = Math.round((b.score/b.max)*100), ok = p >= 70;
+    return `<div class="metric"><div class="metric-lbl">${b.naam}</div><div class="metric-val" style="color:${ok?'var(--green)':'var(--red)'}">${b.score}</div><div class="metric-sub">/ ${b.max} pt</div><div class="bar-wrap"><div class="bar-inner" style="width:${p}%;background:${ok?'var(--green)':'var(--red)'}"></div></div></div>`;
+  }).join('');
+  document.getElementById('result-blokken').innerHTML = blokHtml;
+
+  // Analyse
+  let analyse = '';
+  const iconOk = '<span style="color:var(--green)">&#10003;</span>', iconBad = '<span style="color:var(--red)">&#9651;</span>';
+  const zwak = [];
+  toetsDetail.blokken.forEach(b => {
+    const p = Math.round((b.score/b.max)*100);
+    const drempel = b.id === 'D' ? 60 : 70;
+    const ok = p >= drempel;
+    if (!ok) zwak.push(b.naam);
+    analyse += `<div class="analyse-row"><div>${ok?iconOk:iconBad}</div><div><div class="analyse-blok">${b.naam} ${ok?'— goed':'— zwak'} (${b.score}/${b.max} · ${p}%)</div><div class="analyse-txt">${ok?'Voldoende beheersing van dit onderdeel.':'Onvoldoende beheersing — extra aandacht nodig.'}</div></div></div>`;
+  });
+  document.getElementById('analyse-content').innerHTML = analyse;
+
+  const herk = huidigeStudent.herkansing ? 'Dit is een herkansing. ' : '';
+  const advies = zwak.length === 0
+    ? herk + 'Alle blokken voldoende. Geen specifiek advies nodig.'
+    : herk + 'Focus op: ' + zwak.join(' / ') + '. Gebruik het correctiemodel en de lesmaterialen.';
+  document.getElementById('advies-content').innerHTML = '<div class="advies-lbl">&#128161; Advies</div>' + advies;
+
+  // Herkansingsvergelijking tonen indien relevant
+  toonHerkansingsvergelijking();
+
+  document.getElementById('resultaat-terug-btn').onclick = () => goNaarSchermIndex(dynamischeSchermen.length - 1);
+  showScreen('s-resultaat');
+  updateChip();
+}
+
+function toonHerkansingsvergelijking() {
+  const panel = document.getElementById('hk-vergelijk-panel');
+  const isHerkansing = !!huidigeConfig.herkansing_van;
+
+  // Zoek gekoppelde herkansing (als deze toets de ORIGINEEL is)
+  const idx = getToetsenIndex();
+  const gekoppeldeHerkansing = idx.find(t => t.herkansing_van === huidigeToetsId);
+
+  if (isHerkansing) {
+    // Toon origineel eindcijfer naast dit herkansing-eindcijfer
+    const parentData = getToetsData(huidigeConfig.herkansing_van);
+    const parentStudent = parentData?.studenten_data.find(s => s.id === huidigeStudent.id);
+    if (parentStudent) {
+      panel.style.display = 'block';
+      document.getElementById('hk-vergelijk-content').innerHTML =
+        `<div style="display:flex;gap:24px;flex-wrap:wrap;">
+          <div><div style="font-size:11px;color:var(--muted);">Eindcijfer (origineel)</div><div style="font-size:24px;font-weight:bold;color:var(--navy);">${parentStudent.eindcijfer.toFixed(1)}</div></div>
+          <div><div style="font-size:11px;color:var(--muted);">Eindcijfer (herkansing)</div><div style="font-size:24px;font-weight:bold;color:var(--teal);">${berekenAlleComponentCijfers().eindcijfer.toFixed(1)}</div></div>
+        </div>`;
+      return;
+    }
+  } else if (gekoppeldeHerkansing) {
+    const hkData = getToetsData(gekoppeldeHerkansing.toets_id);
+    const hkStudent = hkData?.studenten_data.find(s => s.id === huidigeStudent.id);
+    if (hkStudent) {
+      panel.style.display = 'block';
+      document.getElementById('hk-vergelijk-content').innerHTML =
+        `<div style="display:flex;gap:24px;flex-wrap:wrap;">
+          <div><div style="font-size:11px;color:var(--muted);">Eindcijfer (origineel)</div><div style="font-size:24px;font-weight:bold;color:var(--navy);">${berekenAlleComponentCijfers().eindcijfer.toFixed(1)}</div></div>
+          <div><div style="font-size:11px;color:var(--muted);">Eindcijfer (herkansing)</div><div style="font-size:24px;font-weight:bold;color:var(--teal);">${hkStudent.eindcijfer.toFixed(1)}</div></div>
+        </div>`;
+      return;
+    }
+  }
+  panel.style.display = 'none';
+}
+
+function loadStudentResultaat(studentId) {
+  const data = getToetsData(huidigeToetsId);
+  const s = data.studenten_data.find(x => x.id === studentId);
+  if (!s) return;
+
+  huidigeStudent = { id: s.id, achternaam: s.achternaam, voornaam: s.voornaam, klas: s.klas, herkansing: s.herkansing };
+  huidigeScores = { ...s.scores };
+  huidigeKeuzes = { ...s.scoreKeuzes };
+
+  bouwSchermenLijst();
+  bouwNavigatiebalk();
+  updateChip();
+  toonResultaat();
+}
+
+function clearStudent() {
+  if (!huidigeStudent) return;
+  if (!confirm('Wis alle ingevoerde scores voor ' + huidigeStudent.achternaam + ', ' + huidigeStudent.voornaam + '?')) return;
+  const data = getToetsData(huidigeToetsId);
+  data.studenten_data = data.studenten_data.filter(s => s.id !== huidigeStudent.id);
+  saveToetsData(huidigeToetsId, data);
+  huidigeScores = {}; huidigeKeuzes = {};
+  goNaarSchermIndex(0);
+}
+
+function terugNaarStudentScherm() {
+  bouwStudentKeuzeLijst();
+  document.querySelectorAll('.step').forEach(el => el.classList.remove('active'));
+  document.getElementById('nav-student').classList.add('active');
+  showScreen('s-student');
+}
+
+function printPDF() { window.print(); }
+
+// ── KLASOVERZICHT ─────────────────────────────────────────────
+function bouwKlasoverzicht() {
+  const data = getToetsData(huidigeToetsId);
+  const arr = data.studenten_data || [];
+  document.getElementById('klas-titel').textContent = 'Klasoverzicht — ' + huidigeConfig.toets_naam;
+
+  const voldoende = arr.filter(s => s.eindcijfer >= 5.5).length;
+  document.getElementById('klas-stats').textContent = arr.length + ' student(en) · ' + voldoende + ' voldoende · ' + (arr.length - voldoende) + ' onvoldoende';
+
+  // Dynamische kolomkoppen op basis van blokken in de toets-component
+  const toetsComp = huidigeConfig.componenten.find(c => c.type === 'toets');
+  const blokKolommen = toetsComp.blokken.map(b => ({ id: b.id, label: b.id, max: berekenBlokMax(b) }));
+
+  const thead = document.getElementById('klas-thead-row');
+  thead.innerHTML = '<th>Student</th><th>Klas</th>' +
+    blokKolommen.map(b => `<th>${b.label} (${b.max})</th>`).join('') +
+    huidigeConfig.componenten.map(c => `<th>${c.naam} (${c.weging}%)</th>`).join('') +
+    '<th>Eindcijfer</th><th>Beoordeling</th><th></th>';
+
+  const tbody = document.getElementById('klas-tbody');
+  if (arr.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="99" style="text-align:center;color:var(--muted);padding:20px;">Nog geen studenten.</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = arr.slice().sort((a,b) => (b.eindcijfer||0) - (a.eindcijfer||0)).map(s => {
+    const v = s.eindcijfer >= 5.5;
+    const blokCells = blokKolommen.map(bk => {
+      const scores = s.scores?.[toetsComp.id] || {};
+      const blok = toetsComp.blokken.find(b => b.id === bk.id);
+      const score = berekenBlokScore(scores, blok);
+      const p = Math.round((score/bk.max)*100);
+      return `<td style="color:${p<70?'var(--red)':'inherit'}">${score}/${bk.max}</td>`;
+    }).join('');
+    const compCells = huidigeConfig.componenten.map(c => `<td>${(s.component_cijfers?.[c.id] || 0).toFixed(1)}</td>`).join('');
+    return `<tr>
+      <td style="font-weight:bold;">${s.achternaam}, ${s.voornaam}</td>
+      <td style="font-size:11px;color:var(--muted);">${s.klas}</td>
+      ${blokCells}${compCells}
+      <td><span class="pill ${v?'pill-v':'pill-o'}">${(s.eindcijfer||0).toFixed(1)}</span></td>
+      <td style="font-size:12px;color:${v?'var(--green)':'var(--red)'};">${v?'Voldoende':'Onvoldoende'}</td>
+      <td><button class="link-btn" onclick="loadStudentResultaat('${s.id}')">&#128065;</button></td>
+    </tr>`;
+  }).join('');
+
+  bouwKlaspatroon(arr, toetsComp, blokKolommen);
+  bouwScenarioModus(arr);
+}
+
+function bouwKlaspatroon(arr, toetsComp, blokKolommen) {
+  if (arr.length === 0) { document.getElementById('klas-patroon').innerHTML = ''; return; }
+  const html = blokKolommen.map(bk => {
+    const blok = toetsComp.blokken.find(b => b.id === bk.id);
+    const gem = arr.reduce((s, st) => s + berekenBlokScore(st.scores?.[toetsComp.id] || {}, blok), 0) / arr.length;
+    const p = Math.round((gem/bk.max)*100), ok = p >= 70;
+    return `<div style="margin-bottom:12px;">
+      <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px;">
+        <span style="color:var(--muted);">${blok.naam} (${bk.max} pt)</span>
+        <span style="font-weight:bold;color:${ok?'var(--green)':'var(--red)'}">${gem.toFixed(1)} / ${bk.max} pt (${p}%)</span>
+      </div>
+      <div class="bar-wrap"><div class="bar-inner" style="width:${p}%;background:${ok?'var(--green)':'var(--red)'}"></div></div>
+    </div>`;
+  }).join('');
+  document.getElementById('klas-patroon').innerHTML = html;
+}
+
+function bouwScenarioModus(arr) {
+  const slidersEl = document.getElementById('scenario-sliders');
+  slidersEl.innerHTML = huidigeConfig.componenten.map(c =>
+    `<div class="slider-locked-row"><label>${c.naam}</label><input type="range" min="0" max="100" step="1" value="${c.weging}" id="sl-${c.id}" oninput="syncSlidersEnUpdate('${c.id}')"><span class="slider-val" id="sv-${c.id}">${c.weging}%</span></div>`
+  ).join('');
+  document.getElementById('scenario-warning').textContent = '';
+  updateScenarioTabel();
+}
+
+function syncSlidersEnUpdate(gewijzigdId) {
+  const componenten = huidigeConfig.componenten;
+  const ids = componenten.map(c => c.id);
+  const gewijzigdEl = document.getElementById('sl-' + gewijzigdId);
+  const gewijzigdWaarde = parseInt(gewijzigdEl.value);
+
+  if (ids.length === 2) {
+    const anderId = ids.find(id => id !== gewijzigdId);
+    document.getElementById('sl-' + anderId).value = 100 - gewijzigdWaarde;
+  } else {
+    // Meer dan 2 componenten: herverdeel het verschil proportioneel over de overige sliders
+    const overigeIds = ids.filter(id => id !== gewijzigdId);
+    const overigeHuidigeSom = overigeIds.reduce((s, id) => s + parseInt(document.getElementById('sl-' + id).value), 0);
+    const beschikbaar = 100 - gewijzigdWaarde;
+    if (overigeHuidigeSom > 0) {
+      let toegewezen = 0;
+      overigeIds.forEach((id, i) => {
+        const huidige = parseInt(document.getElementById('sl-' + id).value);
+        let nieuw = Math.round((huidige / overigeHuidigeSom) * beschikbaar);
+        if (i === overigeIds.length - 1) nieuw = beschikbaar - toegewezen; // laatste vangt afrondingsverschil op
+        toegewezen += nieuw;
+        document.getElementById('sl-' + id).value = Math.max(0, nieuw);
+      });
+    } else {
+      // Alle overige stonden op 0: verdeel gelijk
+      const perStuk = Math.floor(beschikbaar / overigeIds.length);
+      overigeIds.forEach((id, i) => {
+        document.getElementById('sl-' + id).value = i === overigeIds.length - 1 ? beschikbaar - perStuk * (overigeIds.length - 1) : perStuk;
+      });
+    }
+  }
+
+  ids.forEach(id => {
+    document.getElementById('sv-' + id).textContent = document.getElementById('sl-' + id).value + '%';
+  });
+  updateScenarioTabel();
+}
+
+function updateScenarioTabel() {
+  const wegingen = {};
+  huidigeConfig.componenten.forEach(c => {
+    wegingen[c.id] = parseInt(document.getElementById('sl-' + c.id).value);
+  });
+  document.getElementById('scenario-warning').textContent = '';
+
+  const data = getToetsData(huidigeToetsId);
+  const arr = data.studenten_data || [];
+  if (arr.length === 0) return;
+
+  let html = '<table style="width:100%;font-size:12px;border-collapse:collapse;"><thead><tr><th style="text-align:left;padding:4px 6px;color:var(--muted);">Student</th><th style="padding:4px 6px;color:var(--muted);">Officieel</th><th style="padding:4px 6px;color:var(--muted);">Scenario</th><th style="padding:4px 6px;color:var(--muted);">Verschil</th></tr></thead><tbody>';
+  arr.slice().sort((a,b)=>(b.eindcijfer||0)-(a.eindcijfer||0)).forEach(s => {
+    const scenarioComponenten = huidigeConfig.componenten.map(c => ({ id: c.id, weging: wegingen[c.id] }));
+    const scenarioCijfer = berekenEindcijfer(s.component_cijfers || {}, scenarioComponenten);
+    const officieel = s.eindcijfer || 0;
+    const diff = Math.round((scenarioCijfer - officieel) * 10) / 10;
+    const kleur = diff > 0 ? 'var(--green)' : diff < 0 ? 'var(--red)' : 'var(--muted)';
+    html += `<tr><td style="padding:4px 6px;">${s.achternaam}, ${s.voornaam}</td><td style="text-align:center;padding:4px 6px;">${officieel.toFixed(1)}</td><td style="text-align:center;padding:4px 6px;font-weight:bold;">${scenarioCijfer.toFixed(1)}</td><td style="text-align:center;padding:4px 6px;color:${kleur};">${diff>0?'+':''}${diff.toFixed(1)}</td></tr>`;
+  });
+  html += '</tbody></table>';
+  document.getElementById('scenario-tabel').innerHTML = html;
+}
+
+function clearAllData() {
+  if (!confirm('Verwijder alle gecorrigeerde studenten voor deze toets? Dit kan niet ongedaan worden gemaakt.')) return;
+  const data = getToetsData(huidigeToetsId);
+  data.studenten_data = [];
+  saveToetsData(huidigeToetsId, data);
+  renderToetsenLijst();
+  bouwKlasoverzicht();
+}
+
+// ── EXPORTS ────────────────────────────────────────────────
+function exportCSV() {
+  const data = getToetsData(huidigeToetsId);
+  const arr = data.studenten_data || [];
+  if (arr.length === 0) { alert('Geen data.'); return; }
+
+  const toetsComp = huidigeConfig.componenten.find(c => c.type === 'toets');
+  const blokKolommen = toetsComp.blokken.map(b => b.id);
+  const headers = ['Achternaam','Voornaam','Klas', ...blokKolommen.map(id => 'Blok ' + id),
+    ...huidigeConfig.componenten.map(c => c.naam + ' (cijfer)'), 'Eindcijfer', 'Beoordeling'];
+
+  const rows = [headers];
+  arr.forEach(s => {
+    const blokScores = blokKolommen.map(bid => {
+      const blok = toetsComp.blokken.find(b => b.id === bid);
+      return berekenBlokScore(s.scores?.[toetsComp.id] || {}, blok);
+    });
+    const compCijfers = huidigeConfig.componenten.map(c => (s.component_cijfers?.[c.id] || 0).toFixed(1));
+    rows.push([s.achternaam, s.voornaam, s.klas, ...blokScores, ...compCijfers,
+      (s.eindcijfer||0).toFixed(1), s.eindcijfer >= 5.5 ? 'Voldoende' : 'Onvoldoende']);
+  });
+
+  const sep = ',';
+  const csv = '\uFEFF' + rows.map(r => r.map(v => '"' + String(v).replace(/"/g,'""') + '"').join(sep)).join('\r\n');
+  const a = document.createElement('a');
+  a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+  a.download = huidigeToetsId + '_Resultaten_' + new Date().toISOString().slice(0,10) + '.csv';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+}
+
+function exportJSON() {
+  const data = getToetsData(huidigeToetsId);
+  const arr = data.studenten_data || [];
+  if (arr.length === 0) { alert('Geen data.'); return; }
+
+  const exportData = {
+    export_datum: new Date().toISOString().slice(0,10),
+    toets_id: huidigeToetsId,
+    toets_naam: huidigeConfig.toets_naam,
+    cesuur_pct: huidigeConfig.cesuur_pct,
+    max_punten: huidigeConfig.max_punten,
+    studenten: arr
+  };
+  const jsonStr = JSON.stringify(exportData, null, 2);
+  const a = document.createElement('a');
+  a.href = 'data:application/json;charset=utf-8,' + encodeURIComponent(jsonStr);
+  a.download = huidigeToetsId + '_Resultaten_' + new Date().toISOString().slice(0,10) + '.json';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+}
+
+// ── ALGEMENE NAVIGATIE ────────────────────────────────────────
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  if (id === 's-klas') bouwKlasoverzicht();
+  if (id === 's-beheer') { renderToetsenLijst(); document.getElementById('validatie-chip').style.display = 'none'; }
+  if (id === 's-student') document.getElementById('validatie-chip').style.display = 'none';
+  window.scrollTo(0,0);
+}
+
+document.getElementById('btn-alle-toetsen').addEventListener('click', function() {
+  document.getElementById('progressbar').style.display = 'none';
+  showScreen('s-beheer');
+});
+
+document.getElementById('nav-student').addEventListener('click', function() {
+  terugNaarStudentScherm();
+});
+document.getElementById('nav-resultaat').addEventListener('click', function() {
+  if (huidigeStudent) toonResultaat();
+});
+document.getElementById('nav-klas').addEventListener('click', function() {
+  showScreen('s-klas');
+});
+
+document.getElementById('config-upload-input').addEventListener('change', function() {
+  if (this.files[0]) laadToetsConfig(this.files[0]);
+});
+document.getElementById('resultaten-upload-input').addEventListener('change', function() {
+  if (this.files[0]) laadResultatenImport(this.files[0]);
+});
+document.getElementById('wiz-vragen-input').addEventListener('change', function() {
+  if (this.files[0]) wizLaadVragen(this.files[0]);
+});
+document.getElementById('wiz-opdrachten-input').addEventListener('change', function() {
+  if (this.files[0]) wizLaadOpdrachten(this.files[0]);
+});
+document.getElementById('wiz-studenten-input').addEventListener('change', function() {
+  if (this.files[0]) wizLaadStudenten(this.files[0]);
+});
+document.getElementById('wiz-migratie-input').addEventListener('change', function() {
+  if (this.files[0]) wizLaadMigratie(this.files[0]);
+});
+
+// ── INITIALISATIE ─────────────────────────────────────────────
+renderToetsenLijst();
+</script>
+</body>
+</html>
